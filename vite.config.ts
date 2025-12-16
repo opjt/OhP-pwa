@@ -1,0 +1,58 @@
+import tailwindcss from '@tailwindcss/vite';
+import { sveltekit } from '@sveltejs/kit/vite';
+import { defineConfig } from 'vite';
+import { SvelteKitPWA } from '@vite-pwa/sveltekit';
+import path from 'path';
+
+export default defineConfig({
+	resolve: { alias: { $lib: path.resolve('./src/lib') } },
+
+	plugins: [
+		tailwindcss(),
+		sveltekit(),
+
+		SvelteKitPWA({
+			srcDir: './src',
+			mode: 'development',
+			strategies: 'injectManifest',
+			filename: 'service-worker.ts',
+
+			// Manifest 설정
+			manifest: {
+				name: 'OhP Notify Platform',
+				short_name: 'OhP',
+				description: 'Web Push Notification Platform like Gotify',
+				theme_color: '#0f172a',
+				background_color: '#ffffff',
+				display: 'standalone',
+				scope: '/',
+				start_url: '/',
+				orientation: 'portrait',
+
+				icons: [
+					{
+						src: '/logo/icon-192.png',
+						sizes: '192x192',
+						type: 'image/png',
+						purpose: 'any maskable'
+					},
+
+					{
+						src: '/logo/icon-512.png',
+						sizes: '512x512',
+						type: 'image/png',
+						purpose: 'any maskable'
+					}
+				]
+			},
+
+			// Service Worker 설정
+			injectManifest: {
+				globPatterns: ['**/*.{js,css,html,ico,png,svg,webp,woff,woff2}']
+			},
+
+			// 개발 모드에서도 PWA 테스트
+			devOptions: { enabled: true, type: 'module', navigateFallback: '/' }
+		})
+	]
+});
