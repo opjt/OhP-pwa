@@ -1,51 +1,59 @@
-<script>
+<script lang="ts">
 	import '$src/app.css';
 	import { goto } from '$app/navigation';
+	import { PUBLIC_VAPID_KEY } from '$env/static/public';
+
+	const VAPID_PUBLIC_KEY = PUBLIC_VAPID_KEY;
+
+	function handleSubscribe() {
+		console.log(VAPID_PUBLIC_KEY);
+	}
 </script>
 
-<div class="bg-white text-slate-900 max-w-md p-8 font-sans mx-auto flex min-h-screen flex-col">
+<div
+	class="bg-base-100 text-base-content max-w-md p-8 font-sans mx-auto flex min-h-screen flex-col"
+>
 	<div class="flex flex-1 flex-col items-center justify-center text-center">
-		<div class="w-20 h-20 bg-slate-900 mb-8 shadow-xl rounded-4xl flex items-center justify-center">
-			<span class="text-white font-black text-3xl italic">OhP</span>
+		<div
+			class="w-20 h-20 bg-neutral text-neutral-content mb-8 shadow-xl rounded-4xl flex items-center justify-center"
+		>
+			<span class="font-black text-3xl italic">OHP</span>
 		</div>
 
 		<div class="space-y-3">
-			<h1 class="text-3xl font-black tracking-tight text-slate-900">One-tap Push</h1>
-			<p class="text-slate-500 leading-relaxed">
+			<h1 class="text-3xl font-black tracking-tight">On-demand hook Push</h1>
+			<p class="leading-relaxed opacity-70">
 				웹훅을 보내고, 폰에서 바로 응답하세요.<br />
-				가장 단순한 <span class="text-blue-600 font-semibold">Interactive Push</span> 도구
+				가장 단순한 <span class="text-primary font-semibold">Interactive Push</span> 도구
 			</p>
 		</div>
+
 		<div class="mt-10 space-y-4 w-full">
 			<div class="px-1 flex items-center justify-between">
-				<span class="font-bold text-slate-400 tracking-widest text-[11px] uppercase"
-					>Quick Test</span
-				>
+				<span class="font-bold tracking-widest text-[11px] uppercase opacity-50">Quick Test</span>
 				<span class="badge badge-success badge-outline badge-xs font-bold text-[9px]">READY</span>
 			</div>
 
 			<div class="group relative">
 				<div class="top-2 left-3 absolute z-10">
 					<div class="gap-1 flex">
-						<span class="w-2 h-2 bg-red-400 rounded-full"></span>
-						<span class="w-2 h-2 bg-amber-400 rounded-full"></span>
-						<span class="w-2 h-2 bg-green-400 rounded-full"></span>
+						<span class="w-2 h-2 bg-error rounded-full"></span>
+						<span class="w-2 h-2 bg-warning rounded-full"></span>
+						<span class="w-2 h-2 bg-success rounded-full"></span>
 					</div>
 				</div>
 
 				<div
-					class="bg-slate-900 rounded-2xl p-5 pt-7 font-mono shadow-2xl relative overflow-hidden text-left text-[13px]"
+					class="bg-neutral text-neutral-content rounded-2xl p-5 pt-7 font-mono shadow-2xl relative overflow-hidden text-left text-[13px]"
 				>
-					<div class="text-blue-400">curl <span class="text-slate-300">-X POST</span></div>
-					<div class="text-slate-300 break-all">"https://ohp.io/api/demo" \</div>
-					<div class="text-slate-300">
-						-d <span class="text-green-400">"msg=Hello OhP!"</span>
+					<span class="text-info">curl</span><span class="">&nbsp;-X POST</span>
+					<div class="break-all opacity-90">"https://pook.io/api/demo" \</div>
+					<div>
+						-d <span class="text-success">"msg=Hello Pook!"</span>
 					</div>
 
 					<button
-						on:click={() => {
-							/* 실제 알림 트리거 함수 */
-						}}
+						on:click={handleSubscribe}
 						class="right-3 bottom-3 btn btn-primary btn-sm rounded-xl gap-2 shadow-lg absolute normal-case transition-transform hover:scale-105"
 					>
 						<svg
@@ -64,7 +72,7 @@
 				</div>
 			</div>
 
-			<p class="text-slate-400 text-[11px]">Run 버튼을 누르면 브라우저 알림이 발송됩니다.</p>
+			<p class="text-[11px] opacity-60">Run 버튼을 누르면 push 알림이 발송됩니다.</p>
 		</div>
 
 		<div class="mt-12 space-y-3 w-full">
@@ -87,16 +95,17 @@
 			</button>
 
 			<button
-				class="btn btn-ghost h-14 rounded-2xl border-slate-100 text-slate-600 hover:bg-slate-50 w-full border transition-all"
+				class="btn btn-outline h-14 rounded-2xl w-full opacity-70 transition-all hover:opacity-100"
 			>
 				<span class="font-semibold text-[15px]">다른 계정으로 로그인</span>
 			</button>
 		</div>
 	</div>
 
-	<footer class="mt-auto text-center">
-		<p class="text-slate-400 text-[12px]">
-			계속 진행함으로써 OhP의 <span class="underline">이용약관</span>에 동의하게 됩니다.
+	<footer class="py-4 mt-auto text-center">
+		<p class="text-[12px] opacity-40">
+			계속 진행함으로써 Pook의 <span class="cursor-pointer underline">이용약관</span>에 동의하게
+			됩니다.
 		</p>
 	</footer>
 </div>
