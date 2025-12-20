@@ -1,51 +1,14 @@
 <script lang="ts">
-	import '$src/app.css';
-	import { setContext, onMount } from 'svelte';
+	import { push } from '$lib/client/pushManager.svelte';
 	import { browser } from '$app/environment';
-
 	let { children } = $props();
-
-	let pushStatus = $state({
-		permission: 'granted'
-	});
-
-	setContext('pushStatus', pushStatus);
-
-	onMount(() => {
-		if (!browser) return;
-
-		// 초기 상태 설정
-		pushStatus.permission = Notification.permission;
-
-		// 권한 변경 모니터링
-		if ('permissions' in navigator) {
-			navigator.permissions.query({ name: 'notifications' }).then((status) => {
-				status.onchange = () => {
-					pushStatus.permission = Notification.permission;
-				};
-			});
-		}
-	});
-
-	async function togglePush() {
-		if (!browser) return;
-
-		if (pushStatus.permission !== 'granted') {
-			const permission = await Notification.requestPermission();
-			pushStatus.permission = permission; // $state 덕분에 자동으로 UI 업데이트
-
-			if (permission === 'granted') {
-				// TODO: Subscription 로직 실행
-			}
-		}
-	}
 </script>
 
 <div>
-	{#if pushStatus.permission !== 'granted'}
+	{#if push.permissionState !== 'granted'}
 		<button
 			type="button"
-			onclick={togglePush}
+			onclick={() => push.handleSubscribe()}
 			class="bg-warning text-warning-content
 			px-6 py-3.5 top-0 sticky z-10 flex w-full cursor-pointer items-center justify-between"
 		>
@@ -57,7 +20,7 @@
 					<span class="h-2 w-2 bg-warning-content relative inline-flex rounded-full"></span>
 				</span>
 				<p class="font-black tracking-tighter text-[11px] uppercase">
-					{pushStatus.permission === 'denied'
+					{push.permissionState === 'denied'
 						? '알림 권한이 차단됨 (브라우저 설정에서 해제 필요)'
 						: '알림 권한이 필요합니다'}
 				</p>
