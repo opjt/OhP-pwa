@@ -1,47 +1,13 @@
 <script lang="ts">
 	import '$src/app.css';
 	import { PUBLIC_VAPID_KEY } from '$env/static/public';
-	import { onMount } from 'svelte';
+	import { getContext, onMount } from 'svelte';
 
 	let pushEnabled = false;
 	let endpointUrl = 'https://pook.io/api/push/user_unique_id';
 	let copySuccess = false;
 
-	// 알림 권한 상태 관리 ('default', 'granted', 'denied')
-	let permissionState = 'granted';
-
-	// script 태그 안에 추가
-	onMount(() => {
-		permissionState = Notification.permission;
-		pushEnabled = permissionState === 'granted';
-
-		// 권한 변경 모니터링 시작
-		if ('permissions' in navigator) {
-			navigator.permissions.query({ name: 'notifications' }).then((status) => {
-				status.onchange = () => {
-					// 사용자가 설정을 바꾸면 이 함수가 실행됩니다!
-					permissionState = Notification.permission;
-					pushEnabled = permissionState === 'granted';
-					console.log('권한 상태가 변경됨:', permissionState);
-				};
-			});
-		}
-	});
-
-	async function togglePush() {
-		if (!pushEnabled) {
-			const permission = await Notification.requestPermission();
-			permissionState = permission;
-			if (permission === 'granted') {
-				pushEnabled = true;
-				// TODO: Subscription 로직
-			} else {
-				pushEnabled = false;
-			}
-		} else {
-			pushEnabled = false;
-		}
-	}
+	const permissionState = getContext<{ permission: string }>('pushStatus');
 
 	async function copyToClipboard() {
 		const curlCmd = `curl -X POST "${endpointUrl}" -d "msg=Hello Pook!"`;
@@ -50,7 +16,7 @@
 		setTimeout(() => (copySuccess = false), 2000);
 	}
 
-	async function sendTestPush() {
+	async function togglePush() {
 		console.log('테스트 푸시 발송');
 	}
 </script>
@@ -72,31 +38,6 @@
 		</a>
 		<h1 class="text-xl font-black tracking-tight">설정</h1>
 	</header>
-
-	{#if permissionState !== 'granted'}
-		<button
-			type="button"
-			title="push-notification"
-			on:click={togglePush}
-			class="bg-warning text-warning-content px-6 py-3 shadow-lg top-22 sticky z-10 flex cursor-pointer items-center justify-between transition-all active:scale-[0.98]"
-		>
-			<div class="gap-3 flex items-center">
-				<span class="h-2 w-2 relative flex">
-					<span
-						class="animate-ping bg-warning-content absolute inline-flex h-full w-full rounded-full opacity-75"
-					></span>
-					<span class="h-2 w-2 bg-warning-content relative inline-flex rounded-full"></span>
-				</span>
-				<p class="font-black tracking-tighter text-[11px] uppercase">
-					{permissionState === 'denied' ? '알림 권한이 차단됨' : '알림 권한이 필요합니다'}
-				</p>
-			</div>
-			<div class="gap-1 flex items-center">
-				<span class="font-bold text-[10px] underline decoration-2 underline-offset-2">설정하기</span
-				>
-			</div>
-		</button>
-	{/if}
 
 	<main class="px-6 pb-10 pt-4 space-y-10 flex-1 overflow-x-hidden">
 		<section>
@@ -121,13 +62,6 @@
 			<div class="mb-4 flex items-center justify-between">
 				<div class="gap-2 flex items-center">
 					<h2 class="font-bold text-[11px] tracking-[0.2em] uppercase opacity-40">Endpoint</h2>
-					<span
-						class="badge {pushEnabled
-							? 'badge-success'
-							: 'badge-ghost opacity-30'} badge-outline badge-xs font-bold px-1.5 text-[9px]"
-					>
-						{pushEnabled ? 'ACTIVE' : 'INACTIVE'}
-					</span>
 				</div>
 				{#if copySuccess}
 					<span class="text-success font-bold animate-bounce text-[10px]">COPIED!</span>
@@ -172,7 +106,7 @@
 					<div>
 						<p class="text-sm font-bold">푸시 알림 활성화</p>
 						<p class="text-[12px] opacity-50">
-							{permissionState === 'denied'
+							{permissionState.permission === 'denied'
 								? '브라우저 설정에서 차단을 해제해주세요'
 								: '브라우저 알림 권한을 요청합니다'}
 						</p>
@@ -182,7 +116,7 @@
 						class="toggle toggle-primary"
 						bind:checked={pushEnabled}
 						on:change={togglePush}
-						disabled={permissionState === 'denied'}
+						disabled={permissionState.permission === 'denied'}
 					/>
 				</label>
 			</div>
