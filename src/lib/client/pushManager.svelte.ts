@@ -53,10 +53,12 @@ class PushNotificationManager {
 	private watchPermission() {
 		if ('permissions' in navigator) {
 			navigator.permissions.query({ name: 'notifications' }).then((status) => {
-				status.onchange = () => {
+				status.onchange = async () => {
 					this.permissionState = Notification.permission;
+					console.log('permissionState', this.permissionState);
 					// 권한이 취소(denied)되었다면 구독 상태도 업데이트
 					if (this.permissionState !== 'granted') {
+						await this.unsubscribe(this.subscription!);
 						this.isSubscribed = false;
 						this.subscription = null;
 					} else {
@@ -65,6 +67,20 @@ class PushNotificationManager {
 					}
 				};
 			});
+		}
+	}
+	async unsubscribe(sub: PushSubscription) {
+		try {
+			const res = await fetch(`${this.SERVER_URL}/push/unsubscribe`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify(sub),
+				credentials: 'include'
+			});
+			if (!res.ok) throw new Error('알림 구독 해제 실패');
+		} catch (e) {
+			const message = e instanceof Error ? e.message : '알 수 없는 오류';
+			this.showStatus(message, 'error');
 		}
 	}
 
@@ -106,7 +122,8 @@ class PushNotificationManager {
 			const res = await fetch(`${this.SERVER_URL}/push/subscribe`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify(this.subscription)
+				body: JSON.stringify(this.subscription),
+				credentials: 'include'
 			});
 
 			if (!res.ok) throw new Error('서버 구독 등록 실패');
@@ -123,7 +140,10 @@ class PushNotificationManager {
 		try {
 			const reg = await navigator.serviceWorker.ready;
 			const sub = await reg.pushManager.getSubscription();
-			if (sub) await sub.unsubscribe();
+			if (sub) {
+				await sub.unsubscribe();
+				await this.unsubscribe(sub);
+			}
 
 			this.subscription = null;
 			this.isSubscribed = false;
@@ -140,7 +160,8 @@ class PushNotificationManager {
 			const res = await fetch(`${this.SERVER_URL}/push/push`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify(this.subscription)
+				body: JSON.stringify(this.subscription),
+				credentials: 'include'
 			});
 			if (!res.ok) throw new Error('푸시 전송 실패');
 			this.showStatus('✅ 테스트 알림 전송!', 'success');
