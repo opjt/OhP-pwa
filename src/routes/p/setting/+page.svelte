@@ -2,6 +2,7 @@
 	import '$src/app.css';
 	import { push } from '$lib/client/pushManager.svelte';
 	import { logout } from '$lib/client/auth/lifecycle';
+	import { auth } from '$lib/stores/auth';
 
 	let pushEnabled = false;
 	let endpointUrl = 'https://pook.io/api/push/user_unique_id';
@@ -56,7 +57,7 @@
 				</div>
 				<div>
 					<p class="font-bold text-[15px]">사용자님</p>
-					<p class="text-xs opacity-60">user@example.com</p>
+					<p class="text-xs opacity-60">{$auth?.email ?? ''}</p>
 					<div class="badge badge-primary badge-sm mt-1 font-bold text-[10px]">FREE PLAN</div>
 				</div>
 			</div>

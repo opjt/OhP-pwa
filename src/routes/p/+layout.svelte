@@ -1,6 +1,12 @@
 <script lang="ts">
 	import { push } from '$lib/client/pushManager.svelte';
 	import { browser } from '$app/environment';
+	import { onMount } from 'svelte';
+	import { auth } from '$lib/stores/auth';
+
+	onMount(() => {
+		auth.init();
+	});
 	let { children } = $props();
 </script>
 
