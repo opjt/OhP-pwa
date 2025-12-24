@@ -3,7 +3,7 @@
 	import { auth } from '$lib/stores/auth';
 	import { fade, slide } from 'svelte/transition';
 	import { goto } from '$app/navigation';
-	import { ChevronDown, Settings, X } from 'lucide-svelte';
+	import { ChevronDown, Server, Settings, X } from 'lucide-svelte';
 
 	// 1. 서비스 목록
 	const myServices = [
@@ -109,17 +109,26 @@
 			<p class="font-mono text-[10px] opacity-40">{$auth?.email || 'Guest'}</p>
 		</div>
 
-		<button
-			title="setting "
-			onclick={() => goto('/p/setting')}
-			class="btn btn-square btn-ghost btn-sm rounded-xl opacity-40 transition-all hover:opacity-100"
-		>
-			<Settings />
-		</button>
+		<div>
+			<!-- <button
+				title="setting "
+				onclick={() => goto('/p/services')}
+				class="btn btn-square btn-ghost btn-sm rounded-xl opacity-40 transition-all hover:opacity-100"
+			>
+				<Server />
+			</button> -->
+			<button
+				title="setting "
+				onclick={() => goto('/p/setting')}
+				class="btn btn-square btn-ghost btn-sm rounded-xl opacity-40 transition-all hover:opacity-100"
+			>
+				<Settings />
+			</button>
+		</div>
 	</header>
 
 	<main class="px-4 relative flex-1">
-		<div class="py-2 mb-2 top-20 sticky z-20">
+		<div class="py-2 top-20 sticky z-20">
 			<div class="relative inline-block">
 				<button
 					onclick={toggleFilter}
