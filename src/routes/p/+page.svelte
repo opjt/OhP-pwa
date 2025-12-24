@@ -102,7 +102,7 @@
 
 <div class="bg-base-100 text-base-content font-sans flex min-h-screen flex-col">
 	<header
-		class="px-6 py-6 top-0 bg-base-100/90 backdrop-blur-md border-base-content/5 sticky z-30 flex items-center justify-between border-b"
+		class="px-6 py-6 top-0 bg-base-100/90 backdrop-blur-md border-base-content/10 sticky z-30 flex items-center justify-between border-b"
 	>
 		<div>
 			<h1 class="text-xl font-black tracking-tight">OhP</h1>
@@ -123,7 +123,7 @@
 			<div class="relative inline-block">
 				<button
 					onclick={toggleFilter}
-					class="btn btn-sm h-10 pl-4 pr-3 bg-base-100 border-base-content/10 shadow-xs hover:border-primary hover:bg-base-100 gap-2 flex items-center rounded-full border transition-all"
+					class="btn btn-sm h-10 pl-4 pr-3 bg-base-100 border-base-content/10 shadow-xs hover:border-primary hover:bg-base-100 gap-2 rounded-sm flex items-center border transition-all"
 				>
 					<span class="text-xs font-bold opacity-60">Filter:</span>
 					<span class="text-xs font-black text-primary">{currentFilterName}</span>
@@ -237,6 +237,7 @@
 					<p class="text-xs font-mono">NO_NOTIFICATIONS</p>
 				</div>
 			{/each}
+			<div class="h-100"></div>
 		</div>
 	</main>
 </div>
