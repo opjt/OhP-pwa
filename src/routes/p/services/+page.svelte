@@ -80,14 +80,14 @@
 	}
 </script>
 
-<div class="bg-base-100 text-base-content font-sans flex min-h-screen flex-col">
+<div class="flex min-h-screen flex-col bg-base-100 font-sans text-base-content">
 	<header
-		class="px-6 py-6 top-0 bg-base-100/80 backdrop-blur-md sticky z-20 flex items-center justify-between"
+		class="sticky top-0 z-20 flex items-center justify-between bg-base-100/80 px-6 py-6 backdrop-blur-md"
 	>
 		<div class="flex items-center">
 			<button
 				onclick={() => goto('/p')}
-				class="p-2 -ml-2 mr-2 opacity-50 transition-opacity hover:opacity-100"
+				class="mr-2 -ml-2 p-2 opacity-50 transition-opacity hover:opacity-100"
 				title="home"
 			>
 				<ChevronLeft />
@@ -116,12 +116,12 @@
 		</button>
 	</header> -->
 
-	<main class="px-6 pb-20 pt-2 flex-1 overflow-x-hidden">
+	<main class="flex-1 overflow-x-hidden px-6 pt-2 pb-20">
 		<div class="mb-6 flex items-center justify-between">
-			<h2 class="font-bold text-[11px] tracking-[0.2em] uppercase opacity-40">Manage Endpoints</h2>
+			<h2 class="text-[11px] font-bold tracking-[0.2em] uppercase opacity-40">Manage Endpoints</h2>
 			<button
 				onclick={() => (isAdding = !isAdding)}
-				class="btn btn-xs btn-circle btn-ghost hover:bg-base-200 opacity-60 transition-all hover:opacity-100"
+				class="btn btn-circle opacity-60 btn-ghost transition-all btn-xs hover:bg-base-200 hover:opacity-100"
 				class:rotate-45={isAdding}
 				class:bg-base-200={isAdding}
 				class:opacity-100={isAdding}
@@ -134,21 +134,20 @@
 			{#if isAdding}
 				<div
 					transition:slide
-					class="bg-base-200/80 p-5 rounded-3xl border-primary/20 mb-4 shadow-lg shadow-primary/5 border"
+					class="mb-4 rounded-3xl border border-primary/20 bg-base-200/80 p-5 shadow-lg shadow-primary/5"
 				>
-					<p class="text-xs font-bold mb-3 ml-1">Create New Service</p>
-					<div class="gap-2 flex">
+					<p class="mb-3 ml-1 text-xs font-bold">Create New Service</p>
+					<div class="flex gap-2">
 						<input
 							type="text"
 							bind:value={newServiceName}
 							placeholder="ex) 결제 서버, 비트코인 알림"
-							class="input input-sm h-10 input-bordered rounded-2xl focus:border-primary bg-base-100 w-full focus:outline-none"
+							class="input-bordered input input-sm h-10 w-full rounded-2xl bg-base-100 focus:border-primary focus:outline-none"
 							onkeydown={(e) => e.key === 'Enter' && addService()}
-							autofocus
 						/>
 						<button
 							onclick={addService}
-							class="btn btn-sm h-10 btn-primary rounded-2xl px-4 font-bold"
+							class="btn h-10 rounded-2xl px-4 font-bold btn-soft btn-sm"
 						>
 							등록
 						</button>
@@ -158,7 +157,7 @@
 
 			{#if services.length === 0}
 				<div
-					class="py-12 text-xs bg-base-200/30 rounded-3xl border-base-content/10 gap-3 flex flex-col items-center border border-dashed text-center opacity-40"
+					class="flex flex-col items-center gap-3 rounded-3xl border border-dashed border-base-content/10 bg-base-200/30 py-12 text-center text-xs opacity-40"
 				>
 					<Activity size={24} strokeWidth={1.5} />
 					<p>
@@ -170,41 +169,41 @@
 
 			{#each services as service (service.id)}
 				<div
-					class="group bg-base-200/40 hover:bg-base-200/70 border-base-content/5 rounded-3xl p-5 hover:shadow-lg hover:shadow-base-content/5 relative overflow-hidden border transition-all duration-300"
+					class="group relative overflow-hidden rounded-3xl border border-base-content/5 bg-base-200/40 p-5 transition-all duration-300 hover:bg-base-200/70 hover:shadow-lg hover:shadow-base-content/5"
 				>
 					<div class="mb-4 flex items-center justify-between">
-						<div class="gap-3 flex items-center">
+						<div class="flex items-center gap-3">
 							<div class="relative">
 								<div
-									class="w-2.5 h-2.5 rounded-full transition-all duration-500 {service.active
+									class="h-2.5 w-2.5 rounded-full transition-all duration-500 {service.active
 										? 'bg-success shadow-[0_0_10px_rgba(34,197,94,0.6)]'
 										: 'bg-base-content/20'}"
 								></div>
 								{#if service.active}
 									<div
-										class="inset-0 w-2.5 h-2.5 bg-success animate-ping absolute rounded-full opacity-20"
+										class="absolute inset-0 h-2.5 w-2.5 animate-ping rounded-full bg-success opacity-20"
 									></div>
 								{/if}
 							</div>
 
 							<div>
 								<h3
-									class="font-bold leading-tight text-[15px] {service.active ? '' : 'opacity-40'}"
+									class="text-[15px] leading-tight font-bold {service.active ? '' : 'opacity-40'}"
 								>
 									{service.name}
 								</h3>
 								{#if service.active && service.lastActive}
-									<p class="font-mono mt-0.5 text-[9px] opacity-40">
+									<p class="mt-0.5 font-mono text-[9px] opacity-40">
 										Last active: {service.lastActive}
 									</p>
 								{/if}
 							</div>
 						</div>
 
-						<div class="gap-1 flex items-center">
+						<div class="flex items-center gap-1">
 							<button
 								onclick={() => toggleServiceActive(service.id)}
-								class="btn btn-square btn-sm btn-ghost rounded-xl {service.active
+								class="btn btn-square rounded-xl btn-ghost btn-sm {service.active
 									? 'text-success hover:bg-success/10'
 									: 'text-base-content/30 hover:bg-base-content/10'}"
 								title={service.active ? 'Pause Service' : 'Resume Service'}
@@ -213,7 +212,7 @@
 							</button>
 							<button
 								onclick={() => deleteService(service.id)}
-								class="btn btn-square btn-sm btn-ghost rounded-xl text-error/40 hover:bg-error/10 hover:text-error"
+								class="btn btn-square rounded-xl text-error/40 btn-ghost btn-sm hover:bg-error/10 hover:text-error"
 								title="Delete Service"
 							>
 								<Trash2 size={16} />
@@ -222,21 +221,21 @@
 					</div>
 
 					<div class="group/input relative">
-						<div class="inset-y-0 left-3 pointer-events-none absolute flex items-center opacity-30">
-							<span class="font-bold text-[10px]">POST</span>
+						<div class="pointer-events-none absolute inset-y-0 left-3 flex items-center opacity-30">
+							<span class="text-[10px] font-bold">POST</span>
 						</div>
 						<input
 							type="text"
 							readonly
 							value="https://pook.io/api/push/{service.token}"
-							class="bg-base-100 rounded-2xl pl-12 pr-12 py-3 font-mono border-base-content/5 focus:border-primary/30 focus:bg-base-100/50 w-full truncate border text-[10px] opacity-60 transition-all focus:opacity-100 focus:outline-none"
+							class="w-full truncate rounded-2xl border border-base-content/5 bg-base-100 py-3 pr-12 pl-12 font-mono text-[10px] opacity-60 transition-all focus:border-primary/30 focus:bg-base-100/50 focus:opacity-100 focus:outline-none"
 						/>
 						<button
 							onclick={() => copyEndpoint(service.token, service.id)}
-							class="right-1.5 top-1.5 bottom-1.5 rounded-xl hover:bg-primary/10 hover:text-primary text-base-content/40 absolute flex aspect-square items-center justify-center transition-colors"
+							class="absolute top-1.5 right-1.5 bottom-1.5 flex aspect-square items-center justify-center rounded-xl text-base-content/40 transition-colors hover:bg-primary/10 hover:text-primary"
 						>
 							{#if copiedId === service.id}
-								<span class="font-bold text-success animate-bounce text-[10px]">OK</span>
+								<span class="animate-bounce text-[10px] font-bold text-success">OK</span>
 							{:else}
 								<Copy size={14} />
 							{/if}

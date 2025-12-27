@@ -1,5 +1,4 @@
 <script lang="ts">
-	import '$src/app.css';
 	import { auth } from '$lib/stores/auth';
 	import { fade, slide } from 'svelte/transition';
 	import { goto } from '$app/navigation';
@@ -100,9 +99,9 @@
 	}
 </script>
 
-<div class="bg-base-100 text-base-content font-sans flex min-h-screen flex-col">
+<div class="flex min-h-screen flex-col bg-base-100 font-sans text-base-content">
 	<header
-		class="px-6 py-6 top-0 bg-base-100/90 backdrop-blur-md border-base-content/10 sticky z-30 flex items-center justify-between border-b"
+		class="sticky top-0 z-30 flex items-center justify-between border-b border-base-content/10 bg-base-100/90 px-6 py-6 backdrop-blur-md"
 	>
 		<div>
 			<h1 class="text-xl font-black tracking-tight">OhP</h1>
@@ -120,19 +119,19 @@
 			<button
 				title="setting "
 				onclick={() => goto('/p/setting')}
-				class="btn btn-square btn-ghost btn-sm rounded-xl opacity-40 transition-all hover:opacity-100"
+				class="btn btn-square rounded-xl opacity-40 btn-ghost transition-all btn-sm hover:opacity-100"
 			>
 				<Settings />
 			</button>
 		</div>
 	</header>
 
-	<main class="px-4 relative flex-1">
-		<div class="py-2 top-20 sticky z-20">
+	<main class="relative flex-1 px-4">
+		<div class="sticky top-20 z-20 py-2">
 			<div class="relative inline-block">
 				<button
 					onclick={toggleFilter}
-					class="btn btn-sm h-10 pl-4 pr-3 bg-base-100 border-base-content/10 shadow-xs hover:border-primary hover:bg-base-100 gap-2 rounded-sm flex items-center border transition-all"
+					class="btn flex h-10 items-center gap-2 rounded-sm border border-base-content/10 bg-base-100 pr-3 pl-4 shadow-xs transition-all btn-sm hover:border-primary hover:bg-base-100"
 				>
 					<span class="text-xs font-bold opacity-60">Filter:</span>
 					<span class="text-xs font-black text-primary">{currentFilterName}</span>
@@ -144,37 +143,37 @@
 				{#if isFilterOpen}
 					<div
 						transition:slide={{ duration: 150 }}
-						class="top-12 left-0 w-56 bg-base-100/95 backdrop-blur-xl border-white/10 rounded-2xl shadow-xl p-1 gap-1 absolute flex flex-col overflow-hidden border"
+						class="absolute top-12 left-0 flex w-56 flex-col gap-1 overflow-hidden rounded-2xl border border-white/10 bg-base-100/95 p-1 shadow-xl backdrop-blur-xl"
 					>
 						<button
 							onclick={() => selectFilter('ALL')}
-							class="px-4 py-3 rounded-xl hover:bg-white/5 text-xs font-bold flex items-center justify-between text-left transition-colors {selectedServiceId ===
+							class="flex items-center justify-between rounded-xl px-4 py-3 text-left text-xs font-bold transition-colors hover:bg-white/5 {selectedServiceId ===
 							'ALL'
-								? 'text-primary bg-primary/5'
+								? 'bg-primary/5 text-primary'
 								: 'opacity-60'}"
 						>
 							모든 서비스
 							{#if selectedServiceId === 'ALL'}
-								<span class="w-1.5 h-1.5 bg-primary rounded-full"></span>
+								<span class="h-1.5 w-1.5 rounded-full bg-primary"></span>
 							{/if}
 						</button>
-						<div class="bg-white/5 mx-2 my-1 h-px"></div>
+						<div class="mx-2 my-1 h-px bg-white/5"></div>
 						{#each myServices as svc}
 							<button
 								onclick={() => selectFilter(svc.id)}
-								class="px-4 py-3 rounded-xl hover:bg-white/5 text-xs font-bold flex items-center justify-between text-left transition-colors {selectedServiceId ===
+								class="flex items-center justify-between rounded-xl px-4 py-3 text-left text-xs font-bold transition-colors hover:bg-white/5 {selectedServiceId ===
 								svc.id
-									? 'text-primary bg-primary/5'
+									? 'bg-primary/5 text-primary'
 									: 'opacity-60'}"
 							>
 								{svc.name}
 								{#if selectedServiceId === svc.id}
-									<span class="w-1.5 h-1.5 bg-primary rounded-full"></span>
+									<span class="h-1.5 w-1.5 rounded-full bg-primary"></span>
 								{/if}
 							</button>
 						{/each}
 					</div>
-					<button title="close" class="inset-0 fixed z-[-1]" onclick={() => (isFilterOpen = false)}
+					<button title="close" class="fixed inset-0 z-[-1]" onclick={() => (isFilterOpen = false)}
 					></button>
 				{/if}
 			</div>
@@ -184,27 +183,27 @@
 			{#each filteredList as noti (noti.id)}
 				<div transition:slide={{ duration: 200, axis: 'y' }}>
 					<div
-						class="group/card px-5 py-4 rounded-3xl bg-base-content/3 hover:border-base-content/5 hover:bg-base-content/5 relative border border-transparent transition-all"
+						class="group/card relative rounded-3xl border border-transparent bg-base-content/3 px-5 py-4 transition-all hover:border-base-content/5 hover:bg-base-content/5"
 					>
 						<div class="mb-2 flex items-center justify-between">
-							<div class="gap-2 flex items-center">
+							<div class="flex items-center gap-2">
 								<div
-									class="w-1.5 h-1.5 rounded-full {noti.isRead
+									class="h-1.5 w-1.5 rounded-full {noti.isRead
 										? 'bg-base-content/20'
-										: 'bg-primary animate-pulse'}"
+										: 'animate-pulse bg-primary'}"
 								></div>
 								<span
-									class="font-bold text-[10px] opacity-60 {getServiceInfo(noti.serviceId).color}"
+									class="text-[10px] font-bold opacity-60 {getServiceInfo(noti.serviceId).color}"
 								>
 									{getServiceInfo(noti.serviceId).name}
 								</span>
 							</div>
 
-							<div class="gap-3 flex items-center">
+							<div class="flex items-center gap-3">
 								<span class="font-mono text-[10px] opacity-30">{noti.timestamp}</span>
 								<button
 									onclick={() => removeNotification(noti.id)}
-									class="p-1 -mr-2 opacity-0 transition-opacity group-hover/card:opacity-40 hover:opacity-100!"
+									class="-mr-2 p-1 opacity-0 transition-opacity group-hover/card:opacity-40 hover:opacity-100!"
 									title="알림 삭제"
 								>
 									<X size={16} />
@@ -213,17 +212,17 @@
 						</div>
 
 						<p
-							class="leading-relaxed font-medium text-base-content/90 pl-3.5 border-base-content/10 border-l text-[14px] whitespace-pre-wrap"
+							class="border-l border-base-content/10 pl-3.5 text-[14px] leading-relaxed font-medium whitespace-pre-wrap text-base-content/90"
 						>
 							{noti.body}
 						</p>
 
 						{#if noti.actions && noti.actions.length > 0}
-							<div class="mt-4 pl-3.5 gap-2 flex">
+							<div class="mt-4 flex gap-2 pl-3.5">
 								{#each noti.actions as action}
 									<button
 										onclick={() => handleAction(noti.id, action.type)}
-										class="btn btn-sm h-9 px-4 rounded-xl font-bold text-xs border-none transition-transform active:scale-95
+										class="btn h-9 rounded-xl border-none px-4 text-xs font-bold transition-transform btn-sm active:scale-95
                                         {action.type === 'primary'
 											? 'bg-primary text-primary-content hover:bg-primary/90'
 											: ''}

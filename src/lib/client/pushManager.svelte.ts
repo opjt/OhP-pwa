@@ -1,103 +1,83 @@
 import { browser } from '$app/environment';
 import { PUBLIC_SERVER_URL, PUBLIC_VAPID_KEY } from '$env/static/public';
+import { api } from '$lib/pkg/fetch';
 
 class PushNotificationManager {
 	isLoading = $state(true);
 	isSubscribed = $state(false);
 	subscription = $state<PushSubscription | null>(null);
-	permissionState = $state(browser ? Notification.permission : null);
+	permissionState = $state<NotificationPermission | null>(browser ? Notification.permission : null);
 
+	// 토스트 메시지용 상태
 	statusMsg = $state('');
 	statusType = $state<'success' | 'error' | 'warning' | ''>('');
 
-	// 상수 설정
 	private VAPID_PUBLIC_KEY = PUBLIC_VAPID_KEY;
 	private SERVER_URL = PUBLIC_SERVER_URL;
 
 	constructor() {
 		if (browser) {
-			// 권한이 애초에 없으면 로딩할 필요도 없이 바로 false
-			if (Notification.permission !== 'granted') {
-				this.isLoading = false;
-				this.permissionState = Notification.permission;
-			}
 			this.init();
+			// 권한 변경 감시 시작
 			this.watchPermission();
 		}
 	}
 
 	private async init() {
+		// 브라우저가 아니거나 SW를 지원하지 않으면 로딩 종료
 		if (!browser || !('serviceWorker' in navigator)) {
 			this.isLoading = false;
 			return;
 		}
 
 		try {
-			// 1. 앱 시작 시 미리 서비스 워커 등록
-			await navigator.serviceWorker.register('/service-worker.js', { type: 'module' });
+			// 권한이 denied면 굳이 로딩할 필요 없음 (빠른 종료)
+			if (Notification.permission === 'denied') {
+				this.permissionState = 'denied';
+				return;
+			}
 
-			// 2. 서비스 워커가 준비될 때까지 기다림
+			// 1. 서비스 워커 등록
+			await navigator.serviceWorker.register('/service-worker.js', {
+				type: 'module',
+				scope: '/'
+			});
 			await navigator.serviceWorker.ready;
-			console.log('Service Worker Ready');
+			console.log('[PushManager] Service Worker Ready');
 
-			// 3. 기존 구독 정보 확인
+			// 2. 기존 구독 정보 확인
 			await this.loadSubscription();
 		} catch (e) {
-			console.error('서비스 워커 등록 실패:', e);
+			console.error('[PushManager] Init failed:', e);
 		} finally {
 			this.isLoading = false;
 		}
 	}
 
-	// 핵심: 브라우저 권한 설정을 실시간으로 감시
 	private watchPermission() {
-		if ('permissions' in navigator) {
-			navigator.permissions.query({ name: 'notifications' }).then((status) => {
-				status.onchange = async () => {
-					this.permissionState = Notification.permission;
-					console.log('permissionState', this.permissionState);
-					// 권한이 취소(denied)되었다면 구독 상태도 업데이트
-					if (this.permissionState !== 'granted') {
-						await this.unsubscribe(this.subscription!);
-						this.isSubscribed = false;
-						this.subscription = null;
-					} else {
-						// 만약 권한이 다시 granted로 바뀌었다면 구독 정보를 다시 확인
-						this.loadSubscription();
-					}
-				};
-			});
-		}
-	}
-	async unsubscribe(sub: PushSubscription) {
-		try {
-			const res = await fetch(`${this.SERVER_URL}/push/unsubscribe`, {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify(sub),
-				credentials: 'include'
-			});
-			if (!res.ok) throw new Error('알림 구독 해제 실패');
-		} catch (e) {
-			const message = e instanceof Error ? e.message : '알 수 없는 오류';
-			this.showStatus(message, 'error');
-		}
+		if (!browser || !('permissions' in navigator)) return;
+
+		navigator.permissions.query({ name: 'notifications' }).then((status) => {
+			status.onchange = async () => {
+				const newState = Notification.permission;
+				this.permissionState = newState;
+				console.log('[PushManager] Permission changed:', newState);
+
+				// 권한이 취소(denied)되었다면 상태 초기화 및 서버 통보 시도
+				if (newState === 'denied' && this.subscription) {
+					await this.handleUnsubscribe(); // 재사용
+				} else if (newState === 'granted' && !this.subscription) {
+					await this.loadSubscription();
+				}
+			};
+		});
 	}
 
-	async loadSubscription() {
-		try {
-			const reg = await navigator.serviceWorker.ready;
-			this.subscription = await reg.pushManager.getSubscription();
-			this.isSubscribed = !!this.subscription;
-			this.permissionState = Notification.permission;
-		} catch (e) {
-			console.error('구독 정보 로드 실패:', e);
-		}
-	}
-
-	showStatus(msg: string, type: typeof this.statusType) {
+	// 내부 유틸: 상태 메시지 표시
+	private showStatus(msg: string, type: typeof this.statusType) {
 		this.statusMsg = msg;
 		this.statusType = type;
+		// 메시지가 설정된 후 컴포넌트에서 $effect로 감지하여 토스트를 띄웁니다.
 	}
 
 	private urlBase64ToUint8Array(base64String: string) {
@@ -107,70 +87,127 @@ class PushNotificationManager {
 		return Uint8Array.from([...rawData].map((c) => c.charCodeAt(0)));
 	}
 
+	// 구독 로직
 	async handleSubscribe() {
+		let tempSub: PushSubscription | null = null;
+
 		try {
-			this.showStatus('구독 중...', 'warning');
+			this.showStatus('권한 요청 및 구독 중...', 'warning');
 
 			const reg = await navigator.serviceWorker.ready;
 
+			// 1. 권한 요청
 			const permission = await Notification.requestPermission();
-			if (permission !== 'granted') throw new Error('알림 권한 거부됨');
-			this.subscription = await reg.pushManager.subscribe({
-				userVisibleOnly: true,
-				applicationServerKey: this.urlBase64ToUint8Array(this.VAPID_PUBLIC_KEY)
-			});
-			const res = await fetch(`${this.SERVER_URL}/push/subscribe`, {
+			this.permissionState = permission;
+			if (permission !== 'granted') throw new Error('알림 권한이 거부되었습니다.');
+
+			// 2. 브라우저 구독 생성
+			// 기존 구독이 있다면 그것을 사용, 없다면 새로 생성
+			tempSub = await reg.pushManager.getSubscription();
+			if (!tempSub) {
+				tempSub = await reg.pushManager.subscribe({
+					userVisibleOnly: true,
+					applicationServerKey: this.urlBase64ToUint8Array(this.VAPID_PUBLIC_KEY)
+				});
+			}
+
+			// 3. 서버 전송 (중요: this.subscription이 아닌 tempSub를 보냄)
+			// PushSubscription 객체는 toJSON()을 가지고 있으므로 이를 명시적으로 호출하거나,
+			// JSON.stringify가 내부적으로 호출하도록 객체 자체를 넘깁니다.
+			await api<void>(`${this.SERVER_URL}/subscriptions`, {
+				// 엔드포인트 이름 통일 권장
 				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify(this.subscription),
-				credentials: 'include'
+				body: tempSub.toJSON() // 명시적으로 JSON 직렬화 데이터 전송
 			});
 
-			if (!res.ok) throw new Error('서버 구독 등록 실패');
-
+			// 4. 모든 과정 성공 시 상태 업데이트
+			this.subscription = tempSub;
 			this.isSubscribed = true;
-			this.showStatus('✅ 알림 구독 완료!', 'success');
+			this.showStatus('알림 구독이 완료되었습니다!', 'success');
 		} catch (e) {
-			const message = e instanceof Error ? e.message : '알 수 없는 오류';
-			this.showStatus(`❌ 구독 실패: ${message}`, 'error');
-		}
-	}
-
-	async handleUnsubscribe() {
-		try {
-			const reg = await navigator.serviceWorker.ready;
-			const sub = await reg.pushManager.getSubscription();
-			if (sub) {
-				await sub.unsubscribe();
-				await this.unsubscribe(sub);
+			// 서버 등록 실패 시 브라우저 구독도 취소 (데이터 정합성 유지)
+			if (tempSub) {
+				await tempSub.unsubscribe().catch(() => {}); // 롤백 실패는 무시
 			}
 
 			this.subscription = null;
 			this.isSubscribed = false;
-			this.showStatus('구독 해제 완료', 'warning');
+
+			const message = e instanceof Error ? e.message : '알 수 없는 오류';
+			this.showStatus(`구독 실패: ${message}`, 'error');
+		}
+	}
+
+	// 구독 해제 로직
+	async handleUnsubscribe() {
+		// 이미 구독 정보가 없다면 종료
+		if (!this.subscription) return;
+
+		const subToUnsubscribe = this.subscription; // 현재 구독 객체 캡처
+
+		try {
+			this.showStatus('구독 해제 중...', 'warning');
+
+			// 1. 서버에 먼저 알림 (Best Effort)
+			// 서버 실패가 브라우저 해제를 막으면 안 되므로 try-catch로 감싸거나,
+			// 실패하더라도 진행하도록 로직 구성
+			try {
+				await api<void>(`${this.SERVER_URL}/subscriptions/unsubscribe`, {
+					method: 'POST',
+					body: subToUnsubscribe.toJSON()
+				});
+			} catch (serverError) {
+				console.warn('[PushManager] 서버 구독 해제 실패 (무시하고 진행):', serverError);
+			}
+
+			// 2. 브라우저 구독 해제 (가장 중요)
+			await subToUnsubscribe.unsubscribe();
+
+			this.showStatus('구독이 해제되었습니다.', 'success');
 		} catch (e) {
 			const message = e instanceof Error ? e.message : '알 수 없는 오류';
-			this.showStatus(`❌ 구독 해제 실패: ${message}`, 'error');
+			this.showStatus(`구독 해제 중 오류: ${message}`, 'error');
+		} finally {
+			// 3. 성공하든 실패하든 클라이언트 상태는 초기화 (사용자 입장에서 해제됨)
+			this.subscription = null;
+			this.isSubscribed = false;
+		}
+	}
+
+	async loadSubscription() {
+		try {
+			const reg = await navigator.serviceWorker.ready;
+			const sub = await reg.pushManager.getSubscription();
+
+			this.subscription = sub;
+			this.isSubscribed = !!sub;
+			this.permissionState = Notification.permission;
+
+			console.log('[PushManager] Loaded subscription:', !!sub);
+		} catch (e) {
+			console.error('[PushManager] Load failed:', e);
 		}
 	}
 
 	async testNotification() {
 		try {
-			if (!this.subscription) throw new Error('구독 정보 없음');
-			const res = await fetch(`${this.SERVER_URL}/push/push`, {
+			if (!this.subscription) {
+				this.showStatus('구독 정보가 없습니다.', 'warning');
+				return;
+			}
+
+			await api(`${this.SERVER_URL}/push/push`, {
 				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify(this.subscription),
-				credentials: 'include'
+				// Content-Type 등은 api 유틸 내부 처리에 따름
+				body: { subscription: this.subscription.toJSON() } // 백엔드 DTO에 맞게 구조 조정 필요할 수 있음
 			});
-			if (!res.ok) throw new Error('푸시 전송 실패');
-			this.showStatus('✅ 테스트 알림 전송!', 'success');
+
+			this.showStatus('테스트 알림을 보냈습니다!', 'success');
 		} catch (e) {
-			const message = e instanceof Error ? e.message : '알 수 없는 오류';
-			this.showStatus(` 테스트 실패 : ${message}`, 'error');
+			const message = e instanceof Error ? e.message : '전송 실패';
+			this.showStatus(`테스트 실패: ${message}`, 'error');
 		}
 	}
 }
 
-// 싱글톤으로 인스턴스 생성하여 export
 export const push = new PushNotificationManager();

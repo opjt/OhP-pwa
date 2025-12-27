@@ -4,9 +4,10 @@
 	import { fetchEndpoints, deleteEndpoint, type Endpoint } from '$lib/api/endpoints';
 	import { logout } from '$lib/client/auth/lifecycle';
 	import { push } from '$lib/client/pushManager.svelte';
+	import { toast } from 'svelte-sonner';
 	import { api } from '$lib/pkg/fetch';
 	import { auth } from '$lib/stores/auth';
-	import '$src/app.css';
+
 	import { Bell, BellOff, ChevronLeft, Copy, Plus, Trash2 } from 'lucide-svelte';
 	import { onMount } from 'svelte';
 	import { slide } from 'svelte/transition';
@@ -20,8 +21,27 @@
 	let loading = $state(true);
 	let error = $state<string | null>(null);
 
+	let isToggling = $state(false);
+
 	onMount(async () => {
 		await getEndpoints();
+		console.log(push.isSubscribed);
+	});
+	// push.statusMsg를 감시하는 이펙트 추가
+	$effect(() => {
+		if (push.statusMsg) {
+			// 타입에 따라 적절한 토스트 호출
+			if (push.statusType === 'error') {
+				toast.error('알림', {
+					description: push.statusMsg,
+					duration: 3000
+				});
+			} else {
+				toast.success('알림', {
+					description: push.statusMsg
+				});
+			}
+		}
 	});
 
 	async function getEndpoints() {
@@ -56,7 +76,7 @@
 
 	// 서비스 삭제 핸들러
 	async function deleteService(id: string) {
-		if (!confirm('정말 이 서비스를 삭제하시겠습니까?')) return;
+		if (!confirm('정말 이 엔드포인트를 삭제하시겠습니까?')) return;
 		try {
 			await deleteEndpoint(id);
 		} catch (e) {
@@ -68,6 +88,7 @@
 
 	// 서비스 토글 핸들러
 	function toggleServiceActive(id: string) {
+		return;
 		// TODO: 백엔드 API 호출 (알림 수신 여부 변경)
 		const idx = endpoints.findIndex((s) => s.id === id);
 		if (idx !== -1) {
@@ -81,28 +102,41 @@
 
 		await navigator.clipboard.writeText(curlCmd);
 		copiedId = id;
-		setTimeout(() => (copiedId = null), 2000);
+		setTimeout(() => (copiedId = null), 1000);
 	}
 
 	// 글로벌 푸시 토글
 	async function handlePushToggle(e: Event) {
-		const target = e.target as HTMLInputElement;
-		if (target.checked) {
-			await push.handleSubscribe();
-		} else {
-			await push.handleUnsubscribe();
+		// 1. HTML 기본 동작(체크박스 즉시 변경)을 막습니다.
+		e.preventDefault();
+
+		// 2. 이미 작업 중이면 중복 실행 방지
+		if (isToggling) return;
+
+		isToggling = true;
+		try {
+			// 3. 현재 상태의 반대 작업을 수행
+			if (push.isSubscribed) {
+				await push.handleUnsubscribe();
+			} else {
+				await push.handleSubscribe();
+			}
+			// 성공하면 push.isSubscribed가 내부에서 바뀌고,
+			// UI는 checked={push.isSubscribed}에 의해 자동으로 업데이트됩니다.
+		} finally {
+			isToggling = false;
 		}
 	}
 </script>
 
-<div class="bg-base-100 text-base-content font-sans flex min-h-screen flex-col">
+<div class="flex min-h-screen flex-col bg-base-100 font-sans text-base-content">
 	<header
-		class="px-6 py-6 top-0 bg-base-100/80 backdrop-blur-md sticky z-20 flex items-center justify-between"
+		class="sticky top-0 z-20 flex items-center justify-between bg-base-100/80 px-6 py-6 backdrop-blur-md"
 	>
 		<div class="flex items-center">
 			<button
 				onclick={() => goto('/p')}
-				class="p-2 -ml-2 mr-2 opacity-50 transition-opacity hover:opacity-100"
+				class="mr-2 -ml-2 p-2 opacity-50 transition-opacity hover:opacity-100"
 				title="home"
 			>
 				<ChevronLeft />
@@ -111,61 +145,67 @@
 		</div>
 	</header>
 
-	<main class="px-6 pb-10 pt-4 space-y-10 flex-1 overflow-x-hidden">
+	<main class="flex-1 space-y-10 overflow-x-hidden px-6 pt-4 pb-10">
 		<section>
-			<h2 class="font-bold mb-4 text-[11px] tracking-[0.2em] uppercase opacity-40">Account</h2>
+			<h2 class="mb-4 text-[11px] font-bold tracking-[0.2em] uppercase opacity-40">Account</h2>
 			<div
-				class="gap-4 bg-neutral text-neutral-content p-5 rounded-3xl shadow-sm border-white/5 flex items-center border"
+				class="flex items-center gap-4 rounded-3xl border border-white/5 bg-neutral p-5 text-neutral-content shadow-sm"
 			>
 				<div
-					class="w-14 h-14 bg-base-100/10 rounded-2xl font-black text-xl border-white/10 flex items-center justify-center border italic"
+					class="flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-base-100/10 text-xl font-black italic"
 				>
 					OHP
 				</div>
 				<div>
-					<p class="font-bold text-[15px]">사용자님</p>
+					<p class="text-[15px] font-bold">사용자님</p>
 					<p class="text-xs opacity-60">{$auth?.email ?? ''}</p>
-					<div class="badge badge-primary badge-sm mt-1 font-bold text-[10px]">FREE PLAN</div>
+					<div class="mt-1 badge badge-sm text-[10px] font-bold badge-primary">FREE PLAN</div>
 				</div>
 			</div>
 		</section>
 
 		<section>
-			<h2 class="font-bold mb-4 text-[11px] tracking-[0.2em] uppercase opacity-40">
+			<h2 class="mb-4 text-[11px] font-bold tracking-[0.2em] uppercase opacity-40">
 				Global Settings
 			</h2>
-			<div class="bg-base-200/50 rounded-3xl p-2 border-base-content/5 gap-1 flex flex-col border">
+			<div class="flex flex-col gap-1 rounded-3xl border border-base-content/5 bg-base-200/50 p-2">
 				{#if push.isLoading}
-					<div class="p-4 animate-pulse flex items-center justify-between">
+					<div class="flex animate-pulse items-center justify-between p-4">
 						<div class="space-y-2">
-							<div class="h-4 w-24 bg-base-content/10 rounded"></div>
-							<div class="h-3 w-40 bg-base-content/5 rounded"></div>
+							<div class="h-4 w-24 rounded bg-base-content/10"></div>
+							<div class="h-3 w-40 rounded bg-base-content/5"></div>
 						</div>
-						<div class="h-6 w-12 bg-base-content/10 rounded-full"></div>
+						<div class="h-6 w-12 rounded-full bg-base-content/10"></div>
 					</div>
 				{:else}
 					<label
-						class="p-4 hover:bg-base-200 rounded-2xl flex cursor-pointer items-center justify-between transition-colors"
+						class="flex cursor-pointer items-center justify-between rounded-2xl p-4 transition-colors hover:bg-base-200"
 					>
 						<div>
 							<p class="text-sm font-bold">마스터 푸시 알림</p>
 							<p class="text-[12px] opacity-50">모든 서비스의 알림을 제어합니다</p>
 						</div>
-						<input
-							type="checkbox"
-							class="toggle toggle-primary"
-							checked={push.isSubscribed}
-							onchange={handlePushToggle}
-							disabled={push.permissionState === 'denied'}
-						/>
+						<div class="flex items-center gap-3">
+							{#if isToggling}
+								<span class="loading loading-xs loading-spinner text-primary"></span>
+							{/if}
+
+							<input
+								type="checkbox"
+								class="toggle toggle-primary"
+								checked={push.isSubscribed}
+								onclick={handlePushToggle}
+								disabled={isToggling || push.permissionState === 'denied'}
+							/>
+						</div>
 					</label>
 					{#if push.isSubscribed}
 						<button
 							onclick={() => push.testNotification()}
-							class="p-4 hover:bg-base-200 rounded-2xl group flex items-center justify-between text-left transition-all active:scale-[0.98]"
+							class="group flex items-center justify-between rounded-2xl p-4 text-left transition-all hover:bg-base-200 active:scale-[0.98]"
 						>
 							<div>
-								<p class="text-sm font-bold group-hover:text-primary transition-colors">
+								<p class="text-sm font-bold transition-colors group-hover:text-primary">
 									테스트 알림 발송
 								</p>
 								<p class="text-[12px] opacity-50">현재 기기로 테스트 푸시를 즉시 보냅니다</p>
@@ -189,25 +229,14 @@
 					{/if}
 				{/if}
 			</div>
-			{#if push.statusMsg}
-				<div class="px-4 mt-3">
-					<p
-						class="font-bold text-[11px] {push.statusType === 'error'
-							? 'text-error'
-							: 'text-primary'}"
-					>
-						{push.statusMsg}
-					</p>
-				</div>
-			{/if}
 		</section>
 
 		<section>
 			<div class="mb-4 flex items-center justify-between">
-				<h2 class="font-bold text-[11px] tracking-[0.2em] uppercase opacity-40">My Endpoints</h2>
+				<h2 class="text-[11px] font-bold tracking-[0.2em] uppercase opacity-40">My Endpoints</h2>
 				<button
 					onclick={() => (isAdding = !isAdding)}
-					class="btn btn-xs btn-circle btn-ghost hover:bg-base-200 opacity-60 hover:opacity-100"
+					class="btn btn-circle opacity-60 btn-ghost btn-xs hover:bg-base-200 hover:opacity-100"
 				>
 					<Plus
 						size={16}
@@ -220,25 +249,27 @@
 				{#if isAdding}
 					<div
 						transition:slide
-						class="bg-base-200/80 p-4 rounded-3xl border-primary/20 mb-4 border"
+						class="mb-4 rounded-3xl border border-primary/20 bg-base-200/80 p-4"
 					>
-						<p class="text-xs font-bold mb-2 ml-1">새 서비스 이름</p>
-						<div class="gap-2 flex">
+						<p class="mb-2 ml-1 text-xs font-bold">새 서비스 이름</p>
+						<div class="flex gap-2">
 							<input
 								type="text"
 								bind:value={newServiceName}
 								placeholder="ex) 결제 서버 모니터링"
-								class="input input-sm input-bordered rounded-xl w-full focus:outline-none"
+								class="input-bordered input input-sm w-full rounded-xl focus:outline-none"
 								onkeydown={(e) => e.key === 'Enter' && addService()}
 							/>
-							<button onclick={addService} class="btn btn-sm btn-primary rounded-xl">등록</button>
+							<button onclick={addService} class="btn rounded-xl btn-soft btn-sm btn-primary"
+								>등록</button
+							>
 						</div>
 					</div>
 				{/if}
 
 				{#if endpoints.length === 0}
 					<div
-						class="py-8 text-xs bg-base-200/30 rounded-3xl border-base-content/10 border border-dashed text-center opacity-40"
+						class="rounded-3xl border border-dashed border-base-content/10 bg-base-200/30 py-8 text-center text-xs opacity-40"
 					>
 						등록된 서비스가 없습니다.<br />+ 버튼을 눌러 추가해보세요.
 					</div>
@@ -246,23 +277,23 @@
 
 				{#each endpoints as endpoint (endpoint.id)}
 					<div
-						class="group bg-base-200/40 hover:bg-base-200/70 border-base-content/5 rounded-3xl p-4 relative overflow-hidden border transition-all"
+						class="group relative overflow-hidden rounded-3xl border border-base-content/5 bg-base-200/40 p-4 transition-all hover:bg-base-200/70"
 					>
 						<div class="mb-3 flex items-center justify-between">
-							<div class="gap-3 flex items-center">
+							<div class="flex items-center gap-3">
 								<div
-									class="w-2 h-2 rounded-full {endpoint.active
+									class="h-2 w-2 rounded-full {endpoint.active
 										? 'bg-success shadow-[0_0_8px_rgba(34,197,94,0.6)]'
 										: 'bg-base-content/20'}"
 								></div>
-								<span class="font-bold text-sm {endpoint.active ? '' : 'opacity-50'}"
+								<span class="text-sm font-bold {endpoint.active ? '' : 'opacity-50'}"
 									>{endpoint.name}</span
 								>
 							</div>
-							<div class="gap-1 flex items-center">
+							<div class="flex items-center gap-1">
 								<button
 									onclick={() => toggleServiceActive(endpoint.id)}
-									class="btn btn-square btn-xs btn-ghost {endpoint.active
+									class="btn btn-square btn-ghost btn-xs {endpoint.active
 										? 'text-success'
 										: 'text-base-content/30'}"
 									title={endpoint.active ? 'Active' : 'Paused'}
@@ -275,7 +306,7 @@
 								</button>
 								<button
 									onclick={() => deleteService(endpoint.token)}
-									class="btn btn-square btn-xs btn-ghost text-error/50 hover:bg-error/10 hover:text-error"
+									class="btn btn-square text-error/50 btn-ghost btn-xs hover:bg-error/10 hover:text-error"
 									title="Delete"
 								>
 									<Trash2 size={14} />
@@ -288,14 +319,14 @@
 								type="text"
 								readonly
 								value="https://pook.io/api/push/{endpoint.token}"
-								class="bg-base-100 rounded-xl pl-3 pr-10 py-2.5 font-mono border-base-content/5 w-full truncate border text-[10px] opacity-70 transition-opacity focus:opacity-100 focus:outline-none"
+								class="w-full truncate rounded-xl border border-base-content/5 bg-base-100 py-2.5 pr-10 pl-3 font-mono text-[10px] opacity-70 transition-opacity focus:opacity-100 focus:outline-none"
 							/>
 							<button
 								onclick={() => copyEndpoint(endpoint.token, endpoint.id)}
-								class="right-1 top-1 btn btn-square btn-ghost btn-xs rounded-lg hover:bg-primary/10 hover:text-primary absolute"
+								class="btn absolute top-1 right-1 btn-square rounded-lg btn-ghost btn-xs hover:bg-primary/10 hover:text-primary"
 							>
 								{#if copiedId === endpoint.id}
-									<span class="font-bold text-success text-[9px]">V</span>
+									<span class="text-[9px] font-bold text-success">V</span>
 								{:else}
 									<Copy size={12} />
 								{/if}
@@ -306,10 +337,10 @@
 			</div>
 		</section>
 
-		<section class="pt-6 space-y-6">
+		<section class="space-y-6 pt-6">
 			<button
 				onclick={logout}
-				class="btn btn-outline btn-error h-14 rounded-2xl font-bold w-full border-2 opacity-60 transition-all hover:opacity-100"
+				class="btn h-14 w-full rounded-2xl border-2 font-bold opacity-60 transition-all btn-outline btn-error hover:opacity-100"
 			>
 				로그아웃
 			</button>
