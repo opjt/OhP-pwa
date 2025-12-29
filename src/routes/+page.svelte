@@ -3,11 +3,19 @@
 	import { PUBLIC_VAPID_KEY } from '$lib/config';
 	import { PUBLIC_API_URL } from '$lib/config';
 	import { loginWithGithub } from '$lib/client/auth/github-auth';
-	import { Play } from 'lucide-svelte';
+	import { Play, X, Share, SquarePlus } from 'lucide-svelte'; // 아이콘 추가
 	import { onMount } from 'svelte';
+	import { fly } from 'svelte/transition'; // 애니메이션 추가
 	import { auth } from '$lib/stores/auth';
 
 	const VAPID_PUBLIC_KEY = PUBLIC_VAPID_KEY;
+
+	// PWA 설치 관련 변수
+	let deferredPrompt: any;
+	let showInstallPopup = false;
+	let isIOS = false;
+
+	let isWebContext = true;
 
 	function handleSubscribe() {
 		console.log(VAPID_PUBLIC_KEY);
@@ -16,7 +24,58 @@
 	function loginOther() {
 		window.location.href = `${PUBLIC_API_URL}/auth/fake/login`;
 	}
+
+	// PWA 설치 함수
+	async function installPwa() {
+		if (!deferredPrompt) return;
+
+		deferredPrompt.prompt();
+		const { outcome } = await deferredPrompt.userChoice;
+
+		if (outcome === 'accepted') {
+			showInstallPopup = false;
+			deferredPrompt = null;
+		}
+	}
+
+	function closePopup() {
+		showInstallPopup = false;
+	}
+
 	onMount(async () => {
+		// 1. 현재 앱이 설치된 상태(Standalone)인지 확인
+		const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+
+		// 2. iOS 여부 확인 (User Agent 체크)
+		const ua = window.navigator.userAgent.toLowerCase();
+		isIOS =
+			/iphone|ipad|ipod/.test(ua) ||
+			!!(
+				window.navigator.maxTouchPoints &&
+				window.navigator.maxTouchPoints > 1 &&
+				/macintosh|macintel/.test(ua)
+			);
+
+		// 3. iOS이고 아직 설치 안 했다면 -> 팝업 강제 표시 (iOS는 이벤트가 없으므로)
+		if (isIOS && !isStandalone) {
+			// 약간의 딜레이를 주어 자연스럽게 등장
+			setTimeout(() => {
+				showInstallPopup = true;
+			}, 800);
+		}
+		// PWA 설치 이벤트 리스너
+		window.addEventListener('beforeinstallprompt', (e) => {
+			console.log('성공: beforeinstallprompt 이벤트가 발생했습니다!');
+			// 기본 브라우저 동작 방지 (자동으로 뜨는 미니 바 숨김)
+			e.preventDefault();
+			deferredPrompt = e;
+
+			// 웹 환경 조건이 맞고, 설치 이벤트가 발생했을 때만 팝업 표시
+			if (isWebContext) {
+				showInstallPopup = true;
+			}
+		});
+
 		await auth.whenReady();
 		if (auth.isAuthenticated()) {
 			goto('/app');
@@ -25,7 +84,7 @@
 </script>
 
 <div
-	class="max-w-md bg-base-100 p-8 font-sans text-base-content mx-auto flex min-h-screen flex-col"
+	class="max-w-md bg-base-100 p-8 font-sans text-base-content relative mx-auto flex min-h-screen flex-col"
 >
 	<div class="flex flex-1 flex-col items-center justify-center text-center">
 		<div
@@ -113,4 +172,89 @@
 			됩니다.
 		</p>
 	</footer>
+
+	{#if showInstallPopup}
+		<button
+			title="popup-outside"
+			class="inset-0 bg-black/30 fixed z-40 transition-opacity"
+			transition:fly={{ duration: 200 }}
+			on:click={closePopup}
+		></button>
+
+		<div
+			transition:fly={{ y: '100%', duration: 400, opacity: 1 }}
+			class="bottom-0 left-0 right-0 max-w-md fixed z-50 mx-auto w-full"
+		>
+			<div
+				class="border-base-content/10 text-neutral-content bg-base-100 flex w-full flex-col rounded-t-[32px] border-t"
+			>
+				<button title="close" class="pt-4 pb-2 flex w-full justify-center" on:click={closePopup}
+				></button>
+
+				<button
+					class="btn btn-circle btn-ghost btn-sm right-4 top-4 text-base-content hover:bg-white/10 absolute"
+					on:click={closePopup}
+				>
+					<X size={24} />
+				</button>
+
+				<div class="px-8 gap-2 flex flex-1 flex-col items-center justify-center text-center">
+					<div
+						class="h-16 w-16 rounded-2xl bg-primary/20 text-primary shadow-xl flex items-center justify-center"
+					>
+						<img src="/logo/icon-512x512.png" alt="logo" class="rounded-xl" />
+					</div>
+
+					<p class="mt-3 leading-relaxed text-base-content/50 mb-2 text-[15px]">
+						{#if isIOS}
+							iOS 정책상 <strong>Safari</strong>에서 홈 화면에 추가해야<br />
+							알림을 받을 수 있습니다.
+						{:else}
+							홈 화면에 추가하여<br />서비스를 더 빠르게 경험하세요.
+						{/if}
+					</p>
+					{#if isIOS}
+						<div class="mb-10 gap-3 text-sm text-base-content/80 flex flex-col">
+							<div
+								class="gap-4 rounded-xl bg-base-content/10 p-3 px-4 border-base-content/5 flex items-center border"
+							>
+								<span
+									class="h-8 w-8 bg-primary/20 font-bold text-primary flex items-center justify-center rounded-full"
+								>
+									1
+								</span>
+								<span>
+									하단 툴바의 <Share size={16} class="mx-1 inline opacity-70" />
+									<strong class="text-base-content">공유</strong> 버튼 터치
+								</span>
+							</div>
+
+							<div
+								class="gap-4 rounded-xl bg-base-content/10 p-3 px-4 border-base-content/5 flex items-center border"
+							>
+								<span
+									class="h-8 w-8 bg-primary/20 font-bold text-primary flex items-center justify-center rounded-full"
+								>
+									2
+								</span>
+								<span>
+									메뉴에서 <SquarePlus size={16} class="mx-1 inline opacity-70" />
+									<strong class="text-base-content">홈 화면에 추가</strong> 선택
+								</span>
+							</div>
+						</div>
+					{:else}
+						<div class=" pt-0 pb-10 w-full">
+							<button
+								on:click={installPwa}
+								class="btn btn-neutral rounded-2xl text-md w-full transition-transform active:scale-95"
+							>
+								홈 화면에 추가
+							</button>
+						</div>
+					{/if}
+				</div>
+			</div>
+		</div>
+	{/if}
 </div>

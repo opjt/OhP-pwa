@@ -20,15 +20,16 @@ export default defineConfig({
 
 			// Manifest 설정
 			manifest: {
-				name: 'OhP Notify Platform',
+				name: 'OhP',
 				short_name: 'OhP',
-				description: 'Web Push Notification Platform like Gotify',
+				description: 'On-demand hook push notification platform',
 				theme_color: '#0f172a',
 				background_color: '#ffffff',
 				display: 'standalone',
-				scope: '/app/',
+				scope: '/app',
 				start_url: '/app',
 				orientation: 'portrait',
+				id: '/app',
 				icons: [
 					{
 						src: '/logo/icon-192x192.png',
