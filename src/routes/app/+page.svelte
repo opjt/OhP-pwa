@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import {
+		deleteNotification,
 		getNotifications,
 		markAsReadUntil,
 		transformNotification,
@@ -117,6 +118,14 @@
 	function selectFilter(id: string | 'ALL') {
 		selectedServiceId = id;
 		isFilterOpen = false;
+	}
+	async function handleDelete(id: string) {
+		try {
+			await deleteNotification(id);
+			notifications = notifications.filter((n) => n.id !== id);
+		} catch (e) {
+			console.error(e);
+		}
 	}
 </script>
 
@@ -251,11 +260,11 @@
 									>{noti.timestamp}</span
 								>
 								<button
+									onclick={() => handleDelete(noti.id)}
 									class="p-1.5 transition-all hover:opacity-100 active:scale-90 {noti.isRead
 										? 'cursor-default opacity-20'
 										: 'hover:text-primary opacity-50'}"
-									title={noti.isRead ? '읽음' : '읽음 처리'}
-									disabled={noti.isRead}
+									title="삭제"
 								>
 									<X size={18} strokeWidth={2.5} />
 								</button>

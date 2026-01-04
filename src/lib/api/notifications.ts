@@ -66,3 +66,10 @@ export async function markAsReadUntil(lastId: string): Promise<void> {
 		body: { last_id: lastId }
 	});
 }
+
+// 알림 삭제 처리
+export async function deleteNotification(id: string): Promise<void> {
+	await api(`${PUBLIC_API_URL}/notifications/${id}`, {
+		method: 'DELETE'
+	});
+}
