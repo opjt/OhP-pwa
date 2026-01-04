@@ -1,103 +1,113 @@
 <script lang="ts">
-	import { auth } from '$lib/stores/auth';
-	import { fade, slide } from 'svelte/transition';
 	import { goto } from '$app/navigation';
-	import { ChevronDown, Server, Settings, X } from 'lucide-svelte';
+	import {
+		getNotifications,
+		transformNotification,
+		type DisplayNotification
+	} from '$lib/api/notifications';
+	import { debugLog } from '$lib/pkg/util';
+	import { auth } from '$lib/stores/auth';
+	import { ChevronDown, Settings, X } from 'lucide-svelte';
+	import { onMount } from 'svelte';
+	import { slide } from 'svelte/transition';
 
-	// 1. 서비스 목록
-	const myServices = [
-		{ id: 'svc_1', name: '운영 서버', color: 'text-primary' },
-		{ id: 'svc_2', name: '배포 시스템', color: 'text-secondary' },
-		{ id: 'svc_3', name: '결제 승인', color: 'text-accent' }
-	];
+	// --- 상태 관리 ---
+	let notifications = $state<DisplayNotification[]>([]);
+	let nextCursor = $state<string | null>(null);
+	let hasMore = $state(false);
+	let loading = $state(false);
+	let isFilterOpen = $state(false);
+	let selectedServiceId = $state<string | 'ALL'>('ALL');
 
-	// 2. 알림 액션 타입 정의
-	interface Action {
-		label: string;
-		type: 'primary' | 'danger' | 'neutral';
-	}
+	// 관찰할 하단 요소
+	let observerTarget = $state<HTMLElement | null>(null);
 
-	// 3. 알림 데이터 확장 (액션 포함)
-	let notifications = [
-		{
-			id: 1,
-			serviceId: 'svc_3',
-			body: '새로운 결제 요청이 들어왔습니다. (₩1,250,000)\n승인하시겠습니까?',
-			timestamp: '방금 전',
-			isRead: false,
-			// 액션 버튼 데이터
-			actions: [
-				{ label: '승인', type: 'primary' },
-				{ label: '거절', type: 'danger' }
-			] as Action[]
-		},
-		{
-			id: 2,
-			serviceId: 'svc_2',
-			body: 'Frontend (v1.3.0) 배포 준비가 완료되었습니다.\n배포를 시작하려면 버튼을 누르세요.',
-			timestamp: '10분 전',
-			isRead: true,
-			actions: [
-				{ label: '지금 배포', type: 'primary' },
-				{ label: '나중에', type: 'neutral' }
-			] as Action[]
-		},
-		{
-			id: 3,
-			serviceId: 'svc_1',
-			body: '[Warning] CPU 사용률이 95% 이상 유지되고 있습니다. 로그 확인이 필요합니다.',
-			timestamp: '1시간 전',
-			isRead: true
-			// 액션이 없는 일반 알림
-		},
-		{
-			id: 4,
-			serviceId: 'svc_1',
-			body: '[Warning] CPU 사용률이 95% 이상 유지되고 있습니다. 로그 확인이 필요합니다.\n줄바꿈 테스트',
-			timestamp: '1시간 전',
-			isRead: true
-			// 액션이 없는 일반 알림
+	// 알림 목록에서 엔드포인트 목록 추출
+	let endpoints = $derived([...new Set(notifications.map((n) => n.endpointName))]);
+
+	// 필터링된 리스트
+	let filteredList = $derived(
+		notifications.filter((n) =>
+			selectedServiceId === 'ALL' ? true : n.endpointName === selectedServiceId
+		)
+	);
+
+	let currentFilterName = $derived(selectedServiceId === 'ALL' ? '모든 서비스' : selectedServiceId);
+
+	// 데이터 로딩 함수 (기존과 동일하되 로그 추가)
+	async function loadNotifications(isFirst = false) {
+		if (loading || (!isFirst && !hasMore)) {
+			debugLog('Skip loading', { loading, hasMore, isFirst });
+			return;
 		}
-	];
 
-	let selectedServiceId: string | 'ALL' = 'ALL';
-	let showUnreadOnly = true; // 기본값을 true로 변경
-	let isFilterOpen = false;
+		loading = true;
+		debugLog('Start loading', { isFirst, nextCursor });
+		try {
+			const res = await getNotifications(isFirst ? undefined : (nextCursor ?? undefined));
+			const newItems = res.items.map(transformNotification);
 
-	$: filteredList = notifications
-		.filter((n) => (selectedServiceId === 'ALL' ? true : n.serviceId === selectedServiceId))
-		.filter((n) => (showUnreadOnly ? !n.isRead : true));
+			if (isFirst) {
+				notifications = newItems;
+			} else {
+				notifications = [...notifications, ...newItems];
+			}
 
-	$: currentFilterName =
-		selectedServiceId === 'ALL'
-			? '모든 서비스'
-			: myServices.find((s) => s.id === selectedServiceId)?.name || 'Unknown';
-
-	$: unreadCount = notifications.filter((n) => !n.isRead).length;
-
-	function getServiceInfo(id: string) {
-		return myServices.find((s) => s.id === id) || { name: 'Unknown', color: 'text-base-content' };
+			nextCursor = res.next_cursor;
+			hasMore = res.has_more;
+			debugLog('Load success', { itemsCount: newItems.length, hasMore });
+		} catch (e) {
+			console.error('Failed:', e);
+		} finally {
+			loading = false;
+		}
 	}
 
+	$effect(() => {
+		if (!observerTarget) {
+			debugLog('Target element not found yet');
+			return;
+		}
+
+		debugLog('Setting up IntersectionObserver');
+		const observer = new IntersectionObserver(
+			(entries) => {
+				const entry = entries[0];
+				debugLog('Observer Triggered', {
+					isIntersecting: entry.isIntersecting, // 관찰영역에 있는지
+					hasMore,
+					loading
+				});
+
+				if (entry.isIntersecting && hasMore && !loading) {
+					debugLog('Condition met! Loading more...');
+					loadNotifications();
+				}
+			},
+			{
+				threshold: 0.1,
+				rootMargin: '100px' // 사용자가 바닥에 닿기 100px 전에 미리 로딩 시작
+			}
+		);
+
+		observer.observe(observerTarget);
+
+		// 클린업: 요소가 사라지면 자동으로 연결 해제
+		return () => {
+			debugLog('Disconnecting observer');
+			observer.disconnect();
+		};
+	});
+
+	onMount(() => {
+		loadNotifications(true);
+	});
 	function toggleFilter() {
 		isFilterOpen = !isFilterOpen;
 	}
-
 	function selectFilter(id: string | 'ALL') {
 		selectedServiceId = id;
 		isFilterOpen = false;
-	}
-
-	// 알림 읽음 처리 핸들러
-	function markAsRead(id: number) {
-		notifications = notifications.map((n) => (n.id === id ? { ...n, isRead: true } : n));
-	}
-
-	// 액션 버튼 클릭 핸들러 (예시)
-	function handleAction(notiId: number, actionType: string) {
-		console.log(`Notification ${notiId}: Action '${actionType}' clicked`);
-		// 실제 로직: API 호출 후 성공 시 알림 읽음 처리
-		markAsRead(notiId);
 	}
 </script>
 
@@ -147,11 +157,11 @@
 					{#if isFilterOpen}
 						<div
 							transition:slide={{ duration: 150 }}
-							class="top-12 left-0 w-56 gap-1 rounded-2xl border-white/10 bg-base-100/95 p-1 shadow-xl backdrop-blur-xl absolute flex flex-col overflow-hidden border"
+							class="top-12 left-0 w-56 gap-1 rounded-sm border-white/10 bg-base-100/95 p-1 shadow-xl backdrop-blur-xl absolute flex flex-col overflow-hidden border"
 						>
 							<button
 								onclick={() => selectFilter('ALL')}
-								class="rounded-xl px-4 py-3 text-xs font-bold hover:bg-white/5 flex items-center justify-between text-left transition-colors {selectedServiceId ===
+								class="rounded-sm px-4 py-3 text-xs font-bold hover:bg-white/5 flex items-center justify-between text-left transition-colors {selectedServiceId ===
 								'ALL'
 									? 'bg-primary/5 text-primary'
 									: 'opacity-60'}"
@@ -162,16 +172,16 @@
 								{/if}
 							</button>
 							<div class="mx-2 my-1 bg-white/5 h-px"></div>
-							{#each myServices as svc}
+							{#each endpoints as enp}
 								<button
-									onclick={() => selectFilter(svc.id)}
-									class="rounded-xl px-4 py-3 text-xs font-bold hover:bg-base-content/5 flex items-center justify-between text-left transition-colors {selectedServiceId ===
-									svc.id
+									onclick={() => selectFilter(enp)}
+									class="rounded-sm px-4 py-3 text-xs font-bold hover:bg-base-content/5 flex items-center justify-between text-left transition-colors {selectedServiceId ===
+									enp
 										? 'bg-primary/5 text-primary'
 										: 'opacity-60'}"
 								>
-									{svc.name}
-									{#if selectedServiceId === svc.id}
+									{enp}
+									{#if selectedServiceId === enp}
 										<span class="h-1.5 w-1.5 bg-primary rounded-full"></span>
 									{/if}
 								</button>
@@ -186,7 +196,7 @@
 				</div>
 
 				<!-- 전체보기 필터 토글 -->
-				<button
+				<!-- <button
 					onclick={() => (showUnreadOnly = !showUnreadOnly)}
 					class="btn h-10 gap-2 rounded-sm border-base-content/10 bg-base-100 px-4 shadow-xs btn-sm hover:border-primary hover:bg-base-100 flex items-center transition-all {showUnreadOnly
 						? 'border-primary '
@@ -202,7 +212,7 @@
 							{unreadCount}
 						</span>
 					{/if}
-				</button>
+				</button> -->
 			</div>
 		</div>
 
@@ -210,7 +220,7 @@
 			{#each filteredList as noti (noti.id)}
 				<div transition:slide={{ duration: 200, axis: 'y' }}>
 					<div
-						class="group/card rounded-3xl px-5 py-4 relative border transition-all
+						class="group/card rounded-xl px-5 py-4 relative border transition-all
 						{noti.isRead
 							? 'bg-base-content/2 hover:bg-base-content/3 border-transparent opacity-70'
 							: 'bg-primary/12 hover:border-primary/30 hover:bg-primary/9 shadow-sm border-base-content/10'}"
@@ -222,21 +232,16 @@
 										? 'bg-base-content/15'
 										: 'animate-pulse bg-primary shadow-sm shadow-primary/50'}"
 								></div>
-								<span
-									class="font-bold text-[10px] {noti.isRead
-										? 'opacity-40'
-										: 'opacity-70'} {getServiceInfo(noti.serviceId).color}"
-								>
-									{getServiceInfo(noti.serviceId).name}
+								<span class="font-bold text-xs {noti.isRead ? 'opacity-40' : ''} ">
+									{noti.endpointName}
 								</span>
 							</div>
 
 							<div class="gap-3 flex items-center">
-								<span class="font-mono text-[10px] {noti.isRead ? 'opacity-20' : 'opacity-35'}"
+								<span class="font-mono text-xs {noti.isRead ? 'opacity-20' : 'opacity-35'}"
 									>{noti.timestamp}</span
 								>
 								<button
-									onclick={() => markAsRead(noti.id)}
 									class="p-1.5 transition-all hover:opacity-100 active:scale-90 {noti.isRead
 										? 'cursor-default opacity-20'
 										: 'hover:text-primary opacity-50'}"
@@ -257,14 +262,14 @@
 							{noti.body}
 						</p>
 
-						{#if noti.actions && noti.actions.length > 0}
+						<!-- {#if noti.actions && noti.actions.length > 0}
 							<div class="mt-4 gap-2 pl-3.5 flex">
 								{#each noti.actions as action}
 									<button
 										onclick={() => handleAction(noti.id, action.type)}
-										class="btn h-9 rounded-xl px-4 text-xs font-bold btn-sm border-none transition-transform active:scale-95
+										class="btn rounded-xl px-4 text-xs font-bold btn-sm transition-transform active:scale-95
                                         {action.type === 'primary'
-											? 'bg-primary text-primary-content hover:bg-primary/90'
+											? 'btn-primary hover:bg-primary/90'
 											: ''}
                                         {action.type === 'danger'
 											? 'bg-error/10 text-error hover:bg-error/20'
@@ -277,7 +282,7 @@
 									</button>
 								{/each}
 							</div>
-						{/if}
+						{/if} -->
 					</div>
 				</div>
 			{:else}
@@ -285,7 +290,11 @@
 					<p class="text-xs font-mono">NO_NOTIFICATIONS</p>
 				</div>
 			{/each}
-			<div class="h-100"></div>
+			<div class="flex items-center justify-center" bind:this={observerTarget}>
+				{#if loading}
+					<span class="loading loading-spinner loading-lg"></span>
+				{/if}
+			</div>
 		</div>
 	</main>
 </div>
