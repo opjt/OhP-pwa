@@ -205,25 +205,20 @@ class PushNotificationManager {
 		}
 	}
 
-	// async testNotification() {
-	// 	try {
-	// 		if (!this.subscription) {
-	// 			this.showStatus('구독 정보가 없습니다.', 'warning');
-	// 			return;
-	// 		}
+	async testNotification() {
+		try {
+			if (!this.subscription) {
+				return;
+			}
 
-	// 		await api(`${this.SERVER_URL}/push/push`, {
-	// 			method: 'POST',
-	// 			// Content-Type 등은 api 유틸 내부 처리에 따름
-	// 			body: { subscription: this.subscription.toJSON() } // 백엔드 DTO에 맞게 구조 조정 필요할 수 있음
-	// 		});
-
-	// 		this.showStatus('테스트 알림을 보냈습니다!', 'success');
-	// 	} catch (e) {
-	// 		const message = e instanceof Error ? e.message : '전송 실패';
-	// 		this.showStatus(`테스트 실패: ${message}`, 'error');
-	// 	}
-	// }
+			await api<void>(`${this.SERVER_URL}/api/push/test`, {
+				method: 'POST',
+				body: this.subscription.toJSON()
+			});
+		} catch (e) {
+			console.error('[PushManager] Test failed:', e);
+		}
+	}
 }
 
 export const push = new PushNotificationManager();

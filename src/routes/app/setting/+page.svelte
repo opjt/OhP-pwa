@@ -148,6 +148,10 @@
 			isToggling = false;
 		}
 	}
+
+	async function testPush() {
+		await push.testNotification();
+	}
 </script>
 
 <div class="bg-base-100 font-sans text-base-content flex min-h-screen flex-col">
@@ -222,7 +226,7 @@
 					</label>
 					{#if push.isSubscribed}
 						<button
-							onclick={() => console.log('테스트 알림 발송')}
+							onclick={() => testPush()}
 							class="group rounded-2xl p-4 hover:bg-base-200 flex items-center justify-between text-left transition-all active:scale-[0.98]"
 						>
 							<div>
