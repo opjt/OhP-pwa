@@ -11,6 +11,7 @@ export type PushEvent =
 
 class PushNotificationManager {
 	isLoading = $state(true);
+	isToggling = $state(false); // 푸시 알림 상태변환 loading...
 	isSubscribed = $state(false);
 	subscription = $state<PushSubscription | null>(null);
 	permissionState = $state<NotificationPermission | null>(null);
@@ -82,7 +83,7 @@ class PushNotificationManager {
 				console.log('[PushManager] Permission changed:', newState);
 
 				// 권한이 취소(denied)되었다면 상태 초기화 및 서버 통보 시도
-				if (newState === 'denied' && this.subscription) {
+				if ((newState === 'denied' || newState === 'default') && this.subscription) {
 					await this.handleUnsubscribe(); // 재사용
 				} else if (newState === 'granted' && !this.subscription) {
 					await this.loadSubscription();
@@ -104,6 +105,7 @@ class PushNotificationManager {
 			this.emit({ type: 'subscribe-failed', error: '이 브라우저는 알림을 지원하지 않습니다.' });
 			return;
 		}
+		this.isToggling = true;
 		let tempSub: PushSubscription | null = null;
 
 		try {
@@ -150,6 +152,8 @@ class PushNotificationManager {
 				type: 'subscribe-failed',
 				error: e instanceof Error ? e.message : 'unknown error'
 			});
+		} finally {
+			this.isToggling = false;
 		}
 	}
 
@@ -157,7 +161,7 @@ class PushNotificationManager {
 	async handleUnsubscribe() {
 		// 이미 구독 정보가 없다면 종료
 		if (!this.subscription) return;
-
+		this.isToggling = true;
 		const subToUnsubscribe = this.subscription; // 현재 구독 객체 캡처
 
 		try {
@@ -186,6 +190,8 @@ class PushNotificationManager {
 			// 3. 성공하든 실패하든 클라이언트 상태는 초기화 (사용자 입장에서 해제됨)
 			this.subscription = null;
 			this.isSubscribed = false;
+
+			this.isToggling = false;
 		}
 	}
 

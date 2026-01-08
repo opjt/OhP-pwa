@@ -38,7 +38,9 @@
 							? '알림 권한이 차단됨 (브라우저 설정에서 해제 필요)'
 							: '알림 권한이 필요합니다'}
 					</p>
-					<span class="font-bold text-[10px] underline underline-offset-2">설정하기</span>
+					{#if push.permissionState !== 'denied'}
+						<span class="font-bold text-[10px] underline underline-offset-2">설정하기</span>
+					{/if}
 				</div>
 			</button>
 		{/if}

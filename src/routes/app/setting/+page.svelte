@@ -27,12 +27,10 @@
 	let loading = $state(true);
 	let error = $state<string | null>(null);
 
-	let isToggling = $state(false);
-
 	onMount(async () => {
 		await getEndpoints();
 	});
-	// push.statusMsg를 감시하는 이펙트 추가
+
 	$effect(() => {
 		const event = push.consumeEvent();
 		if (!event) return;
@@ -132,21 +130,16 @@
 		e.preventDefault();
 
 		// 2. 이미 작업 중이면 중복 실행 방지
-		if (isToggling) return;
+		if (push.isToggling) return;
 
-		isToggling = true;
-		try {
-			// 3. 현재 상태의 반대 작업을 수행
-			if (push.isSubscribed) {
-				await push.handleUnsubscribe();
-			} else {
-				await push.handleSubscribe();
-			}
-			// 성공하면 push.isSubscribed가 내부에서 바뀌고,
-			// UI는 checked={push.isSubscribed}에 의해 자동으로 업데이트됩니다.
-		} finally {
-			isToggling = false;
+		// 3. 현재 상태의 반대 작업을 수행
+		if (push.isSubscribed) {
+			await push.handleUnsubscribe();
+		} else {
+			await push.handleSubscribe();
 		}
+		// 성공하면 push.isSubscribed가 내부에서 바뀌고,
+		// UI는 checked={push.isSubscribed}에 의해 자동으로 업데이트됩니다.
 	}
 
 	async function testPush() {
@@ -211,7 +204,7 @@
 							<p class="text-[12px] opacity-50">모든 서비스의 알림을 제어합니다</p>
 						</div>
 						<div class="gap-3 flex items-center">
-							{#if isToggling}
+							{#if push.isToggling}
 								<span class="loading loading-xs loading-spinner text-primary"></span>
 							{/if}
 
@@ -220,7 +213,7 @@
 								class="toggle toggle-primary"
 								checked={push.isSubscribed}
 								onclick={handlePushToggle}
-								disabled={isToggling || push.permissionState === 'denied'}
+								disabled={push.isToggling || push.permissionState === 'denied'}
 							/>
 						</div>
 					</label>
