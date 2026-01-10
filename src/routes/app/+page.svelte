@@ -72,7 +72,7 @@
 			hasMore = res.has_more;
 			if (newItems.length > 0) {
 				const lastIdOfBatch = newItems[newItems.length - 1].id;
-				await markAsReadUntil(lastIdOfBatch);
+				await markAsReadUntil(lastIdOfBatch, selectedServiceId);
 			}
 			debugLog('Load success', { itemsCount: newItems.length, hasMore });
 		} catch (e) {

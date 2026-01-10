@@ -18,7 +18,6 @@
 	import { onMount } from 'svelte';
 	import { slide } from 'svelte/transition';
 
-	// Svelte 5 $state
 	let endpoints = $state<Endpoint[]>([]);
 
 	let isAdding = $state(false);

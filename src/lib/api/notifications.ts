@@ -68,10 +68,11 @@ export async function getNotifications(
 }
 
 // 알림 읽음 처리
-export async function markAsReadUntil(lastId: string): Promise<void> {
+export async function markAsReadUntil(lastId: string, endpointID?: string): Promise<void> {
+	const actualEndpointID = endpointID && endpointID !== 'ALL' ? endpointID : undefined;
 	await api(`${PUBLIC_API_URL}/notifications/read-until`, {
 		method: 'POST',
-		body: { last_id: lastId }
+		body: { last_id: lastId, endpoint_id: actualEndpointID }
 	});
 }
 
