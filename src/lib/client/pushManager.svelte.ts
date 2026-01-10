@@ -1,6 +1,7 @@
 import { browser } from '$app/environment';
 import { PUBLIC_API_URL, PUBLIC_VAPID_KEY } from '$lib/config';
 import { api } from '$lib/pkg/fetch';
+import { toast } from 'svelte-sonner';
 
 export type PushEvent =
 	| { type: 'subscribed' }
@@ -217,12 +218,12 @@ class PushNotificationManager {
 				return;
 			}
 
-			await api<void>(`${this.SERVER_URL}/api/push/test`, {
+			await api<void>(`${this.SERVER_URL}/api/push-test`, {
 				method: 'POST',
 				body: this.subscription.toJSON()
 			});
-		} catch (e) {
-			console.error('[PushManager] Test failed:', e);
+		} catch (_) {
+			toast.error('테스트 푸시 실패.');
 		}
 	}
 }

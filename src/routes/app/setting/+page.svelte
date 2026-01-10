@@ -200,8 +200,8 @@
 						class="rounded-2xl p-4 hover:bg-base-200 flex cursor-pointer items-center justify-between transition-colors"
 					>
 						<div>
-							<p class="text-sm font-bold">마스터 푸시 알림</p>
-							<p class="text-[12px] opacity-50">모든 서비스의 알림을 제어합니다</p>
+							<p class="text-sm font-bold">푸시 알림</p>
+							<p class="text-[12px] opacity-50">이 기기로 푸시 알림을 수신합니다</p>
 						</div>
 						<div class="gap-3 flex items-center">
 							{#if push.isToggling}

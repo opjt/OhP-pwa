@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { fetchEndpoints, type Endpoint } from '$lib/api/endpoints';
 	import {
 		deleteNotification,
 		getNotifications,
@@ -24,19 +25,28 @@
 	// 관찰할 하단 요소
 	let observerTarget = $state<HTMLElement | null>(null);
 
-	// 알림 목록에서 엔드포인트 목록 추출
-	let endpoints = $derived([...new Set(notifications.map((n) => n.endpointName))]);
+	// 엔드포인트 이름 목록 저장
+	let endpoints = $state<Endpoint[]>([]);
 
 	// 필터링된 리스트
-	let filteredList = $derived(
-		notifications.filter((n) =>
-			selectedServiceId === 'ALL' ? true : n.endpointName === selectedServiceId
-		)
-	);
+	let filteredList = $derived(notifications);
 
-	let currentFilterName = $derived(selectedServiceId === 'ALL' ? '모든 서비스' : selectedServiceId);
+	// 💡 선택된 서비스의 "이름"을 찾기 위한 derived
+	let currentFilterName = $derived.by(() => {
+		if (selectedServiceId === 'ALL') return '모든 서비스';
+		return endpoints.find((e) => e.id === selectedServiceId)?.name || '알 수 없는 서비스';
+	});
 
-	// 데이터 로딩 함수 (기존과 동일하되 로그 추가)
+	async function loadEndpoints() {
+		try {
+			endpoints = await fetchEndpoints();
+		} catch (e) {
+			console.error('Failed to fetch endpoints:', e);
+		} finally {
+		}
+	}
+
+	// 데이터 로딩 함수
 	async function loadNotifications(isFirst = false) {
 		if (loading || (!isFirst && !hasMore)) {
 			debugLog('Skip loading', { loading, hasMore, isFirst });
@@ -46,7 +56,10 @@
 		loading = true;
 		debugLog('Start loading', { isFirst, nextCursor });
 		try {
-			const res = await getNotifications(isFirst ? undefined : (nextCursor ?? undefined));
+			const res = await getNotifications(
+				isFirst ? undefined : (nextCursor ?? undefined),
+				selectedServiceId
+			);
 			const newItems = res.items.map(transformNotification);
 
 			if (isFirst) {
@@ -106,18 +119,20 @@
 	});
 
 	onMount(async () => {
-		try {
-			await loadNotifications(true);
-		} catch (e) {
-			console.error('Initial load failed:', e);
-		}
+		await Promise.all([loadNotifications(true), loadEndpoints()]);
 	});
+
 	function toggleFilter() {
 		isFilterOpen = !isFilterOpen;
 	}
 	function selectFilter(id: string | 'ALL') {
 		selectedServiceId = id;
 		isFilterOpen = false;
+
+		// 필터가 바뀌면 리스트를 초기화하고 첫 페이지부터 다시 로드
+		nextCursor = null;
+		hasMore = true;
+		loadNotifications(true);
 	}
 	async function handleDelete(id: string) {
 		try {
@@ -192,14 +207,14 @@
 							<div class="mx-2 my-1 bg-white/5 h-px"></div>
 							{#each endpoints as enp}
 								<button
-									onclick={() => selectFilter(enp)}
+									onclick={() => selectFilter(enp.id)}
 									class="rounded-sm px-4 py-3 text-xs font-bold hover:bg-base-content/5 flex items-center justify-between text-left transition-colors {selectedServiceId ===
-									enp
+									enp.name
 										? 'bg-primary/5 text-primary'
 										: 'opacity-60'}"
 								>
-									{enp}
-									{#if selectedServiceId === enp}
+									{enp.name}
+									{#if selectedServiceId === enp.id}
 										<span class="h-1.5 w-1.5 bg-primary rounded-full"></span>
 									{/if}
 								</button>

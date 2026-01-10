@@ -54,9 +54,14 @@ export function transformNotification(apiData: NotificationApiResponse): Display
 }
 
 // 실제 API 호출 (Cursor 지원)
-export async function getNotifications(cursor?: string): Promise<PaginatedNotiResponse> {
+export async function getNotifications(
+	cursor?: string,
+	endpointID?: string
+): Promise<PaginatedNotiResponse> {
 	const url = new URL(`${PUBLIC_API_URL}/notifications`);
 	if (cursor) url.searchParams.append('cursor', cursor);
+	if (endpointID && endpointID !== 'ALL') url.searchParams.append('endpoint_id', endpointID);
+
 	url.searchParams.append('limit', '20');
 
 	return await api<PaginatedNotiResponse>(url.toString());
