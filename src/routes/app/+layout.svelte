@@ -1,23 +1,51 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
 	import { push } from '$lib/client/pushManager.svelte';
-	import { auth } from '$lib/stores/auth';
+	import { auth, hasAgreedToTerms } from '$lib/stores/auth';
 	import { onMount } from 'svelte';
 
-	const { ready } = auth;
+	let { children } = $props();
 
-	onMount(async () => {
-		await auth.whenReady();
+	const { ready } = auth;
+	let shouldShowContent = $state(false);
+
+	onMount(() => {
+		auth.whenReady();
+	});
+
+	// 경로나 인증 상태가 바뀔 때마다 체크
+	$effect(() => {
+		if (!$ready) {
+			shouldShowContent = false;
+			return;
+		}
+
+		const currentPath = $page.url.pathname;
 		if (!auth.isAuthenticated()) {
+			shouldShowContent = false;
 			goto('/');
+			return;
 		}
-		if (!auth.hasAgreedToTerms()) {
+		// [derived store] hasAgreedToTerms 에 의하여 상태변경을 감지하고 라우팅 수행.
+		if (currentPath === '/app/welcome' && $hasAgreedToTerms) {
+			shouldShowContent = false;
+			goto('/app');
+			return;
+		}
+
+		if (currentPath !== '/app/welcome' && !$hasAgreedToTerms) {
+			shouldShowContent = false;
 			goto('/app/welcome');
+			return;
 		}
+
+		// 모든 체크 통과
+		shouldShowContent = true;
 	});
 </script>
 
-{#if !$ready}
+{#if !shouldShowContent}
 	<div class="flex h-screen items-center justify-center">
 		<span class="loading loading-spinner loading-lg"></span>
 	</div>
@@ -26,7 +54,7 @@
 		{#if push.permissionState !== null && push.permissionState !== 'granted'}
 			<button
 				type="button"
-				on:click={() => push.handleSubscribe()}
+				onclick={() => push.handleSubscribe()}
 				class="top-0 bg-warning text-warning-content px-6 py-3.5 sticky z-10 flex w-full items-center justify-between"
 			>
 				<div class="gap-3 flex items-center">
@@ -50,7 +78,7 @@
 
 		<div class="flex-1 overflow-y-auto">
 			<div class="max-w-3xl px-4 font-sans text-base-content mx-auto flex flex-col">
-				<slot />
+				{@render children()}
 			</div>
 		</div>
 	</div>

@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
 	import { agreeToTerms } from '$lib/api/user';
 	import { auth } from '$lib/stores/auth';
 	import { Check } from 'lucide-svelte';
@@ -12,12 +11,9 @@
 
 		isSubmitting = true;
 
-		// TODO: API 호출로 동의 정보 저장
 		try {
 			await agreeToTerms();
 			await auth.init();
-			goto('/app');
-			console.log('Terms agreed, redirecting...');
 		} catch (e) {
 			console.error(e);
 		} finally {

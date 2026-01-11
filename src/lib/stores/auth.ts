@@ -72,3 +72,7 @@ export const auth = createAuthStore();
 export const isAuthenticated = derived(auth, ($auth) => {
 	return $auth !== null && $auth !== undefined;
 });
+
+export const hasAgreedToTerms = derived(auth, ($auth) => {
+	return $auth?.terms_agreed ?? false;
+});
