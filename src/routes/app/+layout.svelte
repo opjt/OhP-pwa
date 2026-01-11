@@ -11,6 +11,9 @@
 		if (!auth.isAuthenticated()) {
 			goto('/');
 		}
+		if (!auth.hasAgreedToTerms()) {
+			goto('/app/welcome');
+		}
 	});
 </script>
 

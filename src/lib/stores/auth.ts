@@ -1,5 +1,4 @@
 import { get, writable, derived, type Readable } from 'svelte/store';
-import { browser } from '$app/environment';
 import { fetchWhoami, type UserInfo } from '$lib/api/user';
 
 type AuthState = UserInfo | null | undefined;
@@ -10,6 +9,7 @@ type AuthStore = Readable<AuthState> & {
 	logout: () => void;
 	isAuthenticated: () => boolean;
 	getUser: () => UserInfo | null;
+	hasAgreedToTerms: () => boolean;
 	whenReady: () => Promise<void>;
 };
 
@@ -26,13 +26,6 @@ function createAuthStore(): AuthStore {
 		subscribe,
 
 		init: async () => {
-			if (!browser) {
-				// SSR 환경에서는 즉시 완료
-				readyStore.set(true);
-				readyResolve?.();
-				return;
-			}
-
 			try {
 				const userInfo = await fetchWhoami();
 				set(userInfo);
@@ -58,7 +51,11 @@ function createAuthStore(): AuthStore {
 			const state = get({ subscribe });
 			return state !== null && state !== undefined ? state : null;
 		},
-
+		// 약관 동의 여부 확인
+		hasAgreedToTerms: () => {
+			const state = get({ subscribe });
+			return state?.terms_agreed ?? false;
+		},
 		whenReady: () => readyPromise,
 
 		logout: () => {
