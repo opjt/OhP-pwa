@@ -4,7 +4,6 @@
 	import { Toaster } from '$lib/components/ui/sonner/index';
 	import { onMount } from 'svelte';
 	import { auth } from '$lib/stores/auth';
-	import { goto } from '$app/navigation';
 
 	let { children } = $props();
 
