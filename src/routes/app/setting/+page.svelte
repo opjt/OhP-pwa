@@ -361,7 +361,12 @@
 			>
 				로그아웃
 			</button>
-			<div class="space-y-1 text-center">
+			<div class="space-y-2 text-center">
+				<div class="gap-4 text-xs flex justify-center opacity-40">
+					<a href="/terms" target="" class="hover:opacity-70">이용약관</a>
+					<span>·</span>
+					<a href="/privacy" target="" class="hover:opacity-70">개인정보처리방침</a>
+				</div>
 				<p class="font-mono text-[10px] opacity-30">v1.0.0-beta.build.02</p>
 			</div>
 		</section>

@@ -166,12 +166,7 @@
 		</div>
 	</div>
 
-	<footer class="py-4 mt-auto text-center">
-		<p class="text-[12px] opacity-40">
-			계속 진행함으로써 OhP의 <span class="cursor-pointer underline">이용약관</span>에 동의하게
-			됩니다.
-		</p>
-	</footer>
+	<footer class="py-4 mt-auto text-center"></footer>
 
 	{#if showInstallPopup}
 		<button
