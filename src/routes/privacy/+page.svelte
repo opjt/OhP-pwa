@@ -97,6 +97,13 @@
 							개인 식별, 불량 회원의 부정 이용 방지, 민원 처리 및 공지사항 전달
 						</span>
 					</li>
+					<li class="gap-3 flex">
+						<span class="font-bold shrink-0 opacity-100">3.</span>
+						<span>
+							<span class="font-bold opacity-100">보안 및 서비스 안정성 확보:</span>
+							비인가 접근 방지, 서비스 남용 및 부정 이용 방지
+						</span>
+					</li>
 				</ol>
 			</section>
 
@@ -104,26 +111,58 @@
 			<section>
 				<h3 class="mb-4 text-base font-bold">제3조 (개인정보의 보유 및 이용 기간)</h3>
 				<p class="mb-3 leading-relaxed opacity-70">
-					서비스는 원칙적으로 <span class="font-bold opacity-100">회원 탈퇴 시</span> 개인정보를 지체
-					없이 파기합니다. 단, 관계 법령 위반에 따른 수사·조사 등이 진행 중인 경우에는 해당 종료 시까지
-					보유할 수 있습니다.
+					서비스는 원칙적으로 회원 탈퇴 시 개인정보를 지체 없이 파기합니다. 단, 관련 법령에 따라
+					다음과 같이 일정 기간 보관합니다.
 				</p>
-				<ul class="space-y-2 pl-4 leading-relaxed opacity-70">
-					<li class="gap-2 flex">
-						<span class="shrink-0">•</span>
-						<span>
-							<span class="font-bold opacity-100">보존 항목:</span>
-							이메일, GitHub ID, 푸시 엔드포인트 정보
-						</span>
-					</li>
-					<li class="gap-2 flex">
-						<span class="shrink-0">•</span>
-						<span>
-							<span class="font-bold opacity-100">보존 기간:</span>
-							회원 탈퇴 시 즉시 삭제
-						</span>
-					</li>
-				</ul>
+
+				<div class="space-y-4">
+					<div>
+						<p class="mb-2 text-sm font-bold opacity-100">1. 회원 정보</p>
+						<ul class="space-y-2 pl-4 leading-relaxed opacity-70">
+							<li class="gap-2 flex">
+								<span class="shrink-0">•</span>
+								<span>
+									<span class="font-bold opacity-100">보존 항목:</span>
+									이메일, GitHub ID, 푸시 엔드포인트 정보
+								</span>
+							</li>
+							<li class="gap-2 flex">
+								<span class="shrink-0">•</span>
+								<span>
+									<span class="font-bold opacity-100">보존 기간:</span>
+									회원 탈퇴 시 즉시 삭제
+								</span>
+							</li>
+						</ul>
+					</div>
+
+					<div>
+						<p class="mb-2 text-sm font-bold opacity-100">2. 법령에 따른 보존</p>
+						<div class="overflow-x-auto">
+							<table class="text-sm w-full border-collapse">
+								<thead>
+									<tr class="border-base-content/10 border-b">
+										<th class="px-3 py-2 font-bold text-left opacity-100">보존 항목</th>
+										<th class="px-3 py-2 font-bold text-left opacity-100">보존 기간</th>
+										<th class="px-3 py-2 font-bold text-left opacity-100">법적 근거</th>
+									</tr>
+								</thead>
+								<tbody class="opacity-70">
+									<tr class="border-base-content/5 border-b">
+										<td class="px-3 py-2">접속 로그</td>
+										<td class="px-3 py-2">3개월</td>
+										<td class="px-3 py-2">통신비밀보호법 제15조의2</td>
+									</tr>
+									<tr>
+										<td class="px-3 py-2">부정 이용 기록</td>
+										<td class="px-3 py-2">1년</td>
+										<td class="px-3 py-2">서비스 부정 이용 방지 (IP, 접속 시각, 이용 내역)</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
 			</section>
 
 			<!-- 제4조 -->
@@ -149,54 +188,145 @@
 
 			<!-- 제5조 -->
 			<section>
-				<h3 class="mb-4 text-base font-bold">제5조 (개인정보의 국외 이전)</h3>
+				<h3 class="mb-4 text-base font-bold">제5조 (개인정보의 제3자 제공)</h3>
 				<p class="mb-3 leading-relaxed opacity-70">
-					서비스는 원활한 서비스 제공을 위해 아래와 같이 개인정보를 국외에 보관할 수 있습니다.
+					서비스는 원칙적으로 이용자의 개인정보를 제3자에게 제공하지 않습니다. 다만, 다음의 경우에는
+					예외로 합니다.
+				</p>
+				<ol class="space-y-2 leading-relaxed opacity-70">
+					<li class="gap-3 flex">
+						<span class="font-bold shrink-0 opacity-100">1.</span>
+						<span>이용자가 사전에 동의한 경우</span>
+					</li>
+					<li class="gap-3 flex">
+						<span class="font-bold shrink-0 opacity-100">2.</span>
+						<span>
+							법령의 규정에 의거하거나, 수사 목적으로 법령에 정해진 절차와 방법에 따라 수사기관의
+							요구가 있는 경우
+						</span>
+					</li>
+				</ol>
+			</section>
+
+			<!-- 제6조 -->
+			<section>
+				<h3 class="mb-4 text-base font-bold">제6조 (개인정보 처리 위탁)</h3>
+				<p class="mb-3 leading-relaxed opacity-70">
+					서비스는 원활한 서비스 제공을 위해 다음과 같이 개인정보 처리를 위탁하고 있습니다.
+				</p>
+				<div class="overflow-x-auto">
+					<table class="text-sm w-full border-collapse">
+						<thead>
+							<tr class="border-base-content/10 border-b">
+								<th class="px-3 py-2 font-bold text-left opacity-100">수탁업체</th>
+								<th class="px-3 py-2 font-bold text-left opacity-100">위탁업무 내용</th>
+								<th class="px-3 py-2 font-bold text-left opacity-100">개인정보 항목</th>
+							</tr>
+						</thead>
+						<tbody class="opacity-70">
+							<tr class="border-base-content/5 border-b">
+								<td class="px-3 py-2">GitHub</td>
+								<td class="px-3 py-2">소셜 로그인 인증</td>
+								<td class="px-3 py-2">이메일, GitHub ID, 프로필 사진</td>
+							</tr>
+							<tr>
+								<td class="px-3 py-2">AWS</td>
+								<td class="px-3 py-2">서버 호스팅 및 데이터 보관</td>
+								<td class="px-3 py-2">모든 수집 정보</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</section>
+
+			<!-- 제7조 -->
+			<section>
+				<h3 class="mb-4 text-base font-bold">제7조 (개인정보의 국외 이전)</h3>
+				<p class="mb-3 leading-relaxed opacity-70">
+					서비스는 제6조에 따른 개인정보 처리 위탁으로 인해 개인정보가 국외로 이전됩니다.
 				</p>
 				<ul class="space-y-2 pl-4 leading-relaxed opacity-70">
 					<li class="gap-2 flex">
 						<span class="shrink-0">•</span>
 						<span>
 							<span class="font-bold opacity-100">이전 받는 자:</span>
-							GitHub, AWS (클라우드 인프라 제공업체)
+							GitHub Inc., Amazon Web Services Inc.
 						</span>
 					</li>
 					<li class="gap-2 flex">
 						<span class="shrink-0">•</span>
 						<span>
 							<span class="font-bold opacity-100">이전 항목:</span>
-							이메일, 서비스 이용 데이터
+							이메일, GitHub ID, 프로필 사진, 서비스 이용 데이터
 						</span>
 					</li>
 					<li class="gap-2 flex">
 						<span class="shrink-0">•</span>
 						<span>
 							<span class="font-bold opacity-100">이전 국가:</span>
-							미국 등 해당 업체의 서버 소재지
+							미국
 						</span>
 					</li>
 					<li class="gap-2 flex">
 						<span class="shrink-0">•</span>
 						<span>
 							<span class="font-bold opacity-100">이전 목적:</span>
-							서비스 운영 및 데이터 보관
+							소셜 로그인 인증, 서비스 운영 및 데이터 보관
+						</span>
+					</li>
+					<li class="gap-2 flex">
+						<span class="shrink-0">•</span>
+						<span>
+							<span class="font-bold opacity-100">이전 일시 및 방법:</span>
+							서비스 이용 시 네트워크를 통한 전송
+						</span>
+					</li>
+					<li class="gap-2 flex">
+						<span class="shrink-0">•</span>
+						<span>
+							<span class="font-bold opacity-100">보유 및 이용 기간:</span>
+							회원 탈퇴 시 또는 위탁 계약 종료 시까지
 						</span>
 					</li>
 				</ul>
 			</section>
 
-			<!-- 제6조 -->
+			<!-- 제8조 -->
 			<section>
-				<h3 class="mb-4 text-base font-bold">제6조 (이용자의 권리와 행사방법)</h3>
-				<p class="leading-relaxed opacity-70">
-					이용자는 언제든지 자신의 개인정보를 조회하거나 수정할 수 있으며, '회원탈퇴' 기능을 통해
-					개인정보 수집 이용에 대한 동의를 철회할 수 있습니다.
+				<h3 class="mb-4 text-base font-bold">제8조 (정보주체의 권리·의무 및 행사방법)</h3>
+				<p class="mb-3 leading-relaxed opacity-70">
+					이용자는 언제든지 다음의 권리를 행사할 수 있습니다.
+				</p>
+				<ol class="space-y-2 leading-relaxed opacity-70">
+					<li class="gap-3 flex">
+						<span class="font-bold shrink-0 opacity-100">1.</span>
+						<span>개인정보 열람 요구</span>
+					</li>
+					<li class="gap-3 flex">
+						<span class="font-bold shrink-0 opacity-100">2.</span>
+						<span>개인정보 오류 등이 있을 경우 정정 요구</span>
+					</li>
+					<li class="gap-3 flex">
+						<span class="font-bold shrink-0 opacity-100">3.</span>
+						<span>개인정보 삭제 요구</span>
+					</li>
+					<li class="gap-3 flex">
+						<span class="font-bold shrink-0 opacity-100">4.</span>
+						<span>개인정보 처리정지 요구</span>
+					</li>
+				</ol>
+				<p class="mt-3 leading-relaxed opacity-70">
+					위 권리는 서비스 내 '회원탈퇴' 기능 또는 개인정보보호책임자에게 이메일을 통해 행사할 수
+					있으며, 서비스는 지체 없이 조치하겠습니다.
 				</p>
 			</section>
 
-			<!-- 제7조 -->
+			<!-- 제9조 -->
 			<section>
-				<h3 class="mb-4 text-base font-bold">제7조 (개인정보의 안전성 확보조치)</h3>
+				<h3 class="mb-4 text-base font-bold">제9조 (개인정보의 안전성 확보조치)</h3>
+				<p class="mb-3 leading-relaxed opacity-70">
+					서비스는 개인정보의 안전성 확보를 위해 다음과 같은 조치를 취하고 있습니다.
+				</p>
 				<ul class="space-y-2 pl-4 leading-relaxed opacity-70">
 					<li class="gap-2 flex">
 						<span class="shrink-0">•</span>
@@ -215,9 +345,9 @@
 				</ul>
 			</section>
 
-			<!-- 제8조 -->
+			<!-- 제10조 -->
 			<section>
-				<h3 class="mb-4 text-base font-bold">제8조 (개인정보보호책임자)</h3>
+				<h3 class="mb-4 text-base font-bold">제10조 (개인정보보호책임자)</h3>
 				<p class="mb-3 leading-relaxed opacity-70">
 					서비스는 개인정보 처리에 관한 업무를 총괄하고 불만 처리를 위해 아래와 같이 책임자를
 					지정하고 있습니다.
@@ -238,14 +368,20 @@
 						</span>
 					</li>
 				</ul>
+				<p class="mt-3 leading-relaxed opacity-70">
+					정보주체는 서비스 이용 중 발생한 모든 개인정보 보호 관련 문의, 불만처리, 피해구제 등에
+					관한 사항을 개인정보보호책임자에게 문의하실 수 있습니다.
+				</p>
+			</section>
+
+			<!-- 제11조 -->
+			<section>
+				<h3 class="mb-4 text-base font-bold">제11조 (개인정보처리방침의 변경)</h3>
+				<p class="leading-relaxed opacity-70">
+					이 개인정보처리방침은 2026년 1월 10일부터 적용되며, 법령 및 방침에 따른 변경사항이 있는
+					경우 변경사항 시행 7일 전부터 서비스 내 공지사항을 통해 고지하겠습니다.
+				</p>
 			</section>
 		</div>
-
-		<!-- 하단 안내 -->
-		<!-- <div class="mt-12 rounded-3xl border-base-content/5 bg-base-200/40 p-6 border text-center">
-			<p class="text-sm opacity-60">
-				개인정보 관련 문의사항이 있으시면 위 개인정보보호책임자에게 연락해주세요.
-			</p>
-		</div> -->
 	</main>
 </div>
