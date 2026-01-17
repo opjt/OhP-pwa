@@ -141,7 +141,7 @@ class PushNotificationManager {
 			this.subscription = tempSub;
 			this.isSubscribed = true;
 			this.emit({ type: 'subscribed' });
-		} catch (e) {
+		} catch (_) {
 			// 서버 등록 실패 시 브라우저 구독도 취소 (데이터 정합성 유지)
 			if (tempSub) {
 				await tempSub.unsubscribe().catch(() => {}); // 롤백 실패는 무시
@@ -149,11 +149,6 @@ class PushNotificationManager {
 
 			this.subscription = null;
 			this.isSubscribed = false;
-
-			this.emit({
-				type: 'subscribe-failed',
-				error: e instanceof Error ? e.message : 'unknown error'
-			});
 		} finally {
 			this.isToggling = false;
 		}
