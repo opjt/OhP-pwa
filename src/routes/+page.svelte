@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { loginWithGithub } from '$lib/client/auth/github-auth';
 	import { PUBLIC_API_URL } from '$lib/config';
-	import { Loader2, LoaderCircle, Play, Share, SquarePlus, X } from 'lucide-svelte';
+	import { LoaderCircle, Play, Share, SquarePlus, X } from 'lucide-svelte';
 	// 아이콘 추가
 	import { onMount } from 'svelte';
 	import { fly } from 'svelte/transition';
@@ -79,7 +79,7 @@
 </script>
 
 <div
-	class="max-w-md bg-base-100 p-8 font-sans text-base-content relative mx-auto flex min-h-screen flex-col"
+	class="max-w-md bg-base-100 md:p-4 font-sans text-base-content p-3 relative mx-auto flex min-h-screen flex-col"
 >
 	<div class="flex flex-1 flex-col items-center justify-center text-center">
 		<div
@@ -112,18 +112,18 @@
 				</div>
 
 				<div
-					class="rounded-2xl bg-neutral p-5 pt-7 font-mono text-neutral-content shadow-2xl relative overflow-hidden text-left text-[13px]"
+					class="rounded-2xl bg-neutral p-4 pt-7 pb-6 font-mono text-neutral-content shadow-2xl relative overflow-hidden text-left text-[13px]"
 				>
-					<span class="text-info">curl</span><span class="">&nbsp;-X POST</span>
-					<div class="break-all opacity-90">"{PUBLIC_API_URL}/api/demo" \</div>
-					<div>
-						-d <span class="text-success">'Hello World!'</span>
-					</div>
+					<span class="text-info">curl</span>
+					<span class="break-all opacity-90">"{PUBLIC_API_URL}/api/demo" \ </span>
+					<div>&nbsp;-d <span class="text-success">'Hello World!'</span></div>
+
+					<div></div>
 
 					<button
 						on:click={handleSubscribe}
 						disabled={push.isToggling}
-						class="btn right-3 bottom-3 gap-2 rounded-xl shadow-lg btn-sm btn-primary absolute normal-case transition-transform hover:scale-105"
+						class="btn right-2 bottom-2 gap-2 rounded-xl shadow-lg btn-sm btn-primary absolute normal-case transition-transform hover:scale-105"
 					>
 						{#if push.isToggling}
 							<LoaderCircle size={14} class="animate-spin" />
