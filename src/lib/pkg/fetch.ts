@@ -1,5 +1,6 @@
 import { toast } from 'svelte-sonner';
 import { getErrorMessage } from './error-message';
+import { PUBLIC_API_URL } from '$lib/config';
 
 export type ApiError = {
 	status: number;
@@ -26,6 +27,16 @@ type ApiResponse<T> = {
 		code: string;
 		message: string;
 	};
+};
+
+// 토큰 갱신 중인지 확인하는 플래그 (중복 요청 방지)
+let isRefreshing = false;
+// 갱신을 기다리는 요청들의 큐 (동시 요청 처리용)
+let refreshSubscribers: ((token: boolean) => void)[] = [];
+
+const onRefreshed = (success: boolean) => {
+	refreshSubscribers.forEach((callback) => callback(success));
+	refreshSubscribers = [];
 };
 
 const showToast = (type: ToastType, message: string) => {
@@ -63,18 +74,62 @@ export async function api<TResponse, TBody = unknown>(
 		};
 		throw error;
 	};
-
-	try {
-		const res = await fetch(url, {
+	const executeRequest = async (): Promise<Response> => {
+		return fetch(url, {
 			method,
 			credentials: 'include',
-			headers: {
-				'Content-Type': 'application/json',
-				...headers,
-			},
+			headers: { 'Content-Type': 'application/json', ...headers },
 			body: body ? JSON.stringify(body) : undefined,
 			signal,
 		});
+	};
+
+	try {
+		const res = await executeRequest();
+		// Access Token 만료 (401) 발생 시
+		if (res.status === 401 && !url.includes('/auth/refresh')) {
+			// 갱신 시도 로직
+			if (!isRefreshing) {
+				isRefreshing = true;
+
+				(async () => {
+					try {
+						const refreshRes = await fetch(`${PUBLIC_API_URL}/auth/refresh`, {
+							method: 'POST',
+							credentials: 'include',
+						});
+
+						if (refreshRes.ok) {
+							onRefreshed(true);
+						} else {
+							// 리프레시 토큰 만료 -> 로그아웃
+							onRefreshed(false);
+							window.location.href = '/?expired=true';
+						}
+					} catch (_) {
+						// 네트워크 에러 등
+						onRefreshed(false);
+						window.location.href = '/?expired=true';
+					} finally {
+						isRefreshing = false;
+					}
+				})();
+			}
+
+			// 여기서 new Promise를 리턴하여 현재 요청을 대기 시킵니다.
+			return new Promise<TResponse>((resolve, reject) => {
+				refreshSubscribers.push((success) => {
+					//onRefreshed 가 호출되면 아래 로직 수행
+					if (success) {
+						// 재요청 성공 시 resolve
+						resolve(api<TResponse, TBody>(url, options));
+					} else {
+						// 재요청 실패(로그아웃) 시 reject
+						reject({ status: 401, message: 'Session Expired', code: 'SESSION_EXPIRED' });
+					}
+				});
+			});
+		}
 
 		// HTTP 에러 처리 (400~500번대)
 		if (!res.ok) {
