@@ -21,7 +21,7 @@
 
 	<main class="max-w-3xl px-6 pt-4 pb-20 mx-auto">
 		<div class="mb-8 rounded-3xl border-base-content/5 bg-base-200/40 p-6 border">
-			<h2 class="mb-2 text-2xl font-black">OhP 서비스 이용약관</h2>
+			<h2 class="mb-2 text-2xl font-black">Torchi 서비스 이용약관</h2>
 			<p class="text-sm opacity-60">시행일: 2026년 1월 10일</p>
 		</div>
 
@@ -30,8 +30,8 @@
 			<section>
 				<h3 class="mb-4 text-base font-bold">제1조 (목적)</h3>
 				<p class="leading-relaxed opacity-70">
-					본 약관은 <span class="font-bold opacity-100">OhP</span>(이하 "운영자")이 제공하는 OhP
-					서비스(이하 "서비스")의 이용 조건 및 절차에 관한 사항을 규정함을 목적으로 합니다.
+					본 약관은 <span class="font-bold opacity-100">Torchi</span>(이하 "운영자")이 제공하는
+					Torchi 서비스(이하 "서비스")의 이용 조건 및 절차에 관한 사항을 규정함을 목적으로 합니다.
 				</p>
 			</section>
 

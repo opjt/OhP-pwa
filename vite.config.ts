@@ -20,8 +20,8 @@ export default defineConfig({
 
 			// Manifest 설정
 			manifest: {
-				name: 'OhP',
-				short_name: 'OhP',
+				name: 'torchi',
+				short_name: 'tch',
 				description: 'On-demand hook push notification platform',
 				theme_color: '#0f172a',
 				background_color: '#ffffff',
@@ -35,25 +35,25 @@ export default defineConfig({
 						src: '/logo/icon-192x192.png',
 						sizes: '192x192',
 						type: 'image/png',
-						purpose: 'any'
+						purpose: 'any',
 					},
 					{
 						src: '/logo/icon-512x512.png',
 						sizes: '512x512',
 						type: 'image/png',
-						purpose: 'any maskable'
-					}
-				]
+						purpose: 'any maskable',
+					},
+				],
 			},
 			// Service Worker 설정
 			injectManifest: {
 				swDest: 'service-worker.js',
 				// globPatterns: ['**/*.{js,css,html,ico,png,svg,webp,woff,woff2}']
-				globPatterns: ['**/*.{js,css,html,ico,png,svg,webmanifest,wasm}']
+				globPatterns: ['**/*.{js,css,html,ico,png,svg,webmanifest,wasm}'],
 			},
 
 			// 개발 모드에서도 PWA 테스트
-			devOptions: { enabled: true, type: 'module', navigateFallback: '/' }
-		})
-	]
+			devOptions: { enabled: true, type: 'module', navigateFallback: '/' },
+		}),
+	],
 });

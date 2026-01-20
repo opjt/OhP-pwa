@@ -21,13 +21,13 @@
 
 	<main class="max-w-3xl px-6 pt-4 pb-20 mx-auto">
 		<div class="mb-8 rounded-3xl border-base-content/5 bg-base-200/40 p-6 border">
-			<h2 class="mb-2 text-2xl font-black">OhP 개인정보처리방침</h2>
+			<h2 class="mb-2 text-2xl font-black">Torchi 개인정보처리방침</h2>
 			<p class="text-sm opacity-60">시행일: 2026년 1월 10일</p>
 		</div>
 
 		<div class="mb-8 rounded-3xl border-base-content/5 bg-base-200/40 p-5 border">
 			<p class="leading-relaxed opacity-70">
-				OhP(이하 "서비스")는 이용자의 개인정보를 중요시하며, 「개인정보 보호법」을 준수하고
+				Torchi(이하 "서비스")는 이용자의 개인정보를 중요시하며, 「개인정보 보호법」을 준수하고
 				있습니다. 본 개인정보처리방침은 이용자가 제공한 개인정보가 어떠한 용도와 방식으로 이용되고
 				있으며, 개인정보보호를 위해 어떠한 조치가 취해지고 있는지 알려드립니다.
 			</p>

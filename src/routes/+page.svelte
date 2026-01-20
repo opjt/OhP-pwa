@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { loginWithGithub } from '$lib/client/auth/github-auth';
 	import { PUBLIC_API_URL } from '$lib/config';
-	import { LoaderCircle, Play, Share, SquarePlus, X } from 'lucide-svelte';
+	import { Bell, Flame, LoaderCircle, Play, Share, SquarePlus, X } from 'lucide-svelte';
 	// 아이콘 추가
 	import { onMount } from 'svelte';
 	import { fly } from 'svelte/transition';
@@ -84,24 +84,35 @@
 	class="max-w-md bg-base-100 md:p-4 font-sans text-base-content p-3 relative mx-auto flex min-h-screen flex-col"
 >
 	<div class="flex flex-1 flex-col items-center justify-center text-center">
-		<div
-			class="mb-8 h-20 w-20 rounded-4xl bg-neutral text-neutral-content shadow-xl flex items-center justify-center"
-		>
-			<span class="text-3xl font-black italic">OHP</span>
-		</div>
+		<!-- <div class="mb-8 relative">
+			<div
+				class="h-20 w-20 rounded-3xl bg-neutral text-neutral-content shadow-2xl relative z-10 flex items-center justify-center overflow-hidden"
+			>
+				<Flame size={38} class=" fill-primary/10" />
+			</div>
+			<div class="inset-0 bg-primary/40 blur-2xl absolute z-0 scale-110 rounded-full"></div>
+			<div
+				class="-top-1 -right-1 h-6 w-6 bg-primary border-base-100 absolute z-20 rounded-full border-4"
+			></div>
+		</div> -->
 
-		<div class="space-y-3">
-			<h1 class="text-3xl font-black tracking-tight">On-demand hook Push</h1>
+		<div class="space-y-2">
+			<h1 class="text-4xl font-black tracking-tight gap-1 flex items-center justify-center">
+				Torchi<span class="text-primary">.</span>
+			</h1>
 			<p class="leading-relaxed opacity-70">
 				웹훅을 보내고, 폰에서 바로 응답하세요.<br />
-				가장 단순한 <span class="font-semibold text-primary">Interactive Push</span> 도구
+				가장 단순한 <span class="font-bold text-primary">Interactive Push</span> 플랫폼
 			</p>
 		</div>
 
-		<div class="mt-10 space-y-4 w-full">
+		<div class="mt-10 space-y-4 w-full text-left">
 			<div class="px-1 flex items-center justify-between">
-				<span class="font-bold tracking-widest text-[11px] uppercase opacity-50">Quick Test</span>
-				<!-- <span class="badge badge-outline badge-xs font-bold badge-success text-[9px]">READY</span> -->
+				<span
+					class="font-bold tracking-widest gap-1 flex items-center text-[11px] uppercase opacity-50"
+				>
+					<Bell size={12} /> QUICK Test
+				</span>
 			</div>
 
 			<div class="group relative">
@@ -114,38 +125,35 @@
 				</div>
 
 				<div
-					class="rounded-2xl bg-neutral p-4 pt-7 pb-6 font-mono text-neutral-content shadow-2xl relative overflow-hidden text-left text-[13px]"
+					class="rounded-2xl bg-neutral p-4 pt-7 pb-6 font-mono text-neutral-content shadow-2xl border-white/5 relative overflow-hidden border text-[13px]"
 				>
 					<span class="text-info">curl</span>
-					<span class="break-all opacity-90">"{PUBLIC_API_URL}/api/demo" \ </span>
+					<span class="break-all opacity-90"> "{PUBLIC_API_URL}/api/push" \ </span>
 					<div>&nbsp;-d <span class="text-success">'{demoMessage}'</span></div>
-
-					<div></div>
 
 					<button
 						on:click={handleSubscribe}
 						disabled={push.isToggling}
-						class="btn right-2 bottom-2 gap-2 rounded-xl shadow-lg btn-sm btn-primary disabled:bg-primary disabled:text-primary-content absolute normal-case transition-transform hover:scale-105
-						disabled:opacity-80"
+						class="btn right-2 bottom-2 gap-2 rounded-xl shadow-lg btn-sm btn-primary absolute border-none normal-case transition-all hover:scale-105 active:scale-95"
 					>
 						{#if push.isToggling}
 							<LoaderCircle size={14} class="animate-spin" />
-							Run
+							Sending...
 						{:else}
-							<Play size={14} strokeWidth={2} />
+							<Play size={14} fill="currentColor" />
 							Run
 						{/if}
 					</button>
 				</div>
 			</div>
 
-			<p class="text-[11px] opacity-60">Run 버튼을 누르면 push 알림이 발송됩니다.</p>
+			<p class="text-center text-[11px] opacity-50">버튼을 누르면 푸시 알림이 발송됩니다.</p>
 		</div>
 
 		<div class="mt-12 space-y-3 w-full">
 			<button
 				on:click={loginWithGithub}
-				class="btn h-14 gap-3 rounded-2xl btn-neutral flex w-full items-center justify-center border-none transition-all hover:opacity-90"
+				class="btn h-14 gap-3 rounded-2xl btn-neutral hover:bg-neutral/90 shadow-xl flex w-full items-center justify-center border-none transition-all"
 			>
 				<svg
 					xmlns="http://www.w3.org/2000/svg"
@@ -163,15 +171,14 @@
 
 			<button
 				on:click={fakeLogin}
-				class="btn h-14 rounded-2xl btn-outline w-full opacity-70 transition-all hover:opacity-100"
+				class="btn h-14 rounded-2xl btn-outline border-base-content/20 hover:bg-base-200 w-full opacity-70"
 			>
 				<span class="font-semibold text-[15px]">다른 계정으로 로그인</span>
 			</button>
 		</div>
 	</div>
 
-	<footer class="py-4 mt-auto text-center"></footer>
-
+	<footer class="py-6 mt-auto text-center text-[12px] opacity-30">© 2024 Torchi Platform</footer>
 	{#if showInstallPopup}
 		<button
 			title="popup-outside"

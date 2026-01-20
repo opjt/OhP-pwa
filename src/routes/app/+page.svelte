@@ -6,7 +6,7 @@
 		getNotifications,
 		markAsReadUntil,
 		transformNotification,
-		type DisplayNotification
+		type DisplayNotification,
 	} from '$lib/api/notifications';
 	import { debugLog } from '$lib/pkg/util';
 	import { auth } from '$lib/client/auth/auth';
@@ -58,7 +58,7 @@
 		try {
 			const res = await getNotifications(
 				isFirst ? undefined : (nextCursor ?? undefined),
-				selectedServiceId
+				selectedServiceId,
 			);
 			const newItems = res.items.map(transformNotification);
 
@@ -95,7 +95,7 @@
 				debugLog('Observer Triggered', {
 					isIntersecting: entry.isIntersecting, // 관찰영역에 있는지
 					hasMore,
-					loading
+					loading,
 				});
 
 				if (entry.isIntersecting && hasMore && !loading) {
@@ -105,8 +105,8 @@
 			},
 			{
 				threshold: 0.1,
-				rootMargin: '100px' // 사용자가 바닥에 닿기 100px 전에 미리 로딩 시작
-			}
+				rootMargin: '100px', // 사용자가 바닥에 닿기 100px 전에 미리 로딩 시작
+			},
 		);
 
 		observer.observe(observerTarget);
@@ -149,7 +149,7 @@
 		class="top-0 border-base-content/10 bg-base-100/90 px-6 py-6 backdrop-blur-md sticky z-30 flex items-center justify-between border-b"
 	>
 		<div>
-			<h1 class="text-xl font-black tracking-tight">OhP</h1>
+			<h1 class="text-xl font-black tracking-tight">Torchi</h1>
 			<p class="font-mono text-[10px] opacity-40">{$auth?.email || 'Guest'}</p>
 		</div>
 

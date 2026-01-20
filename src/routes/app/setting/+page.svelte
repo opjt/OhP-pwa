@@ -13,7 +13,7 @@
 	import { api } from '$lib/pkg/fetch';
 	import { auth } from '$lib/client/auth/auth';
 
-	import { Bell, BellOff, ChevronLeft, Copy, Plus, Trash2 } from 'lucide-svelte';
+	import { Bell, BellOff, ChevronLeft, Copy, Plus, Trash2, User } from 'lucide-svelte';
 	import { onMount } from 'svelte';
 	import { slide } from 'svelte/transition';
 
@@ -143,19 +143,38 @@
 	<main class="space-y-10 px-6 pt-4 pb-10 flex-1 overflow-x-hidden">
 		<section>
 			<h2 class="mb-4 font-bold text-[11px] tracking-[0.2em] uppercase opacity-40">Account</h2>
+
 			<div
-				class="gap-4 rounded-3xl border-white/5 bg-neutral p-5 text-neutral-content shadow-sm flex items-center border"
+				class="group rounded-3xl border-base-content/5 bg-base-200/50 p-4 hover:bg-base-200 relative overflow-hidden border transition-all"
 			>
+				<div class="flex items-center justify-between">
+					<div class="gap-4 flex items-center">
+						<div
+							class="h-12 w-12 rounded-2xl bg-base-100 text-base-content/30 shadow-sm ring-base-content/5 flex items-center justify-center ring-1"
+						>
+							<User size={24} strokeWidth={1.5} />
+						</div>
+
+						<div class="flex flex-col">
+							<span class="font-bold text-base-content text-[15px]">
+								{$auth?.email?.split('@')[0] ?? 'Torchi User'}님
+							</span>
+							<span class="text-xs text-base-content/50">
+								{$auth?.email ?? 'user@example.com'}
+							</span>
+						</div>
+					</div>
+
+					<div
+						class="badge badge-primary badge-outline bg-primary/5 px-3 py-3 font-bold tracking-wide text-[10px]"
+					>
+						FREE
+					</div>
+				</div>
+
 				<div
-					class="h-14 w-14 rounded-2xl border-white/10 bg-base-100/10 text-xl font-black flex items-center justify-center border italic"
-				>
-					OHP
-				</div>
-				<div>
-					<p class="font-bold text-[15px]">사용자님</p>
-					<p class="text-xs opacity-60">{$auth?.email ?? ''}</p>
-					<div class="mt-1 badge badge-sm font-bold badge-primary text-[10px]">FREE PLAN</div>
-				</div>
+					class="-left-6 -top-6 h-24 w-24 bg-primary/5 blur-2xl pointer-events-none absolute rounded-full"
+				></div>
 			</div>
 		</section>
 

@@ -28,12 +28,10 @@
 	<main class="max-w-md w-full">
 		<!-- 로고/타이틀 -->
 		<div class="mb-8 text-center">
-			<div
-				class="mb-4 h-16 w-16 rounded-2xl border-white/10 bg-neutral text-2xl font-black text-neutral-content inline-flex items-center justify-center border italic"
-			>
-				OHP
-			</div>
-			<h1 class="mb-2 text-2xl font-black tracking-tight">환영합니다!</h1>
+			<h1 class="text-4xl font-black tracking-tight gap-1 mb-5 flex items-center justify-center">
+				Torchi<span class="text-primary">.</span>
+			</h1>
+			<h1 class="mb-1 text-xl font-black tracking-tight">환영합니다!</h1>
 			<p class="text-sm opacity-60">서비스를 시작하기 전에 약관 동의가 필요합니다</p>
 		</div>
 
