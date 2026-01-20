@@ -114,27 +114,26 @@
 					<Bell size={12} /> QUICK Test
 				</span>
 			</div>
-
 			<div class="group relative">
-				<div class="top-2 left-3 absolute z-10">
+				<div class="top-3 left-3 absolute z-10">
 					<div class="gap-1 flex">
-						<span class="h-2 w-2 bg-error rounded-full"></span>
-						<span class="h-2 w-2 bg-warning rounded-full"></span>
-						<span class="h-2 w-2 bg-success rounded-full"></span>
+						<span class="h-2.5 w-2.5 bg-neutral-content/40 rounded-full"></span>
+						<span class="h-2.5 w-2.5 bg-neutral-content/40 rounded-full"></span>
+						<span class="h-2.5 w-2.5 bg-neutral-content/40 rounded-full"></span>
 					</div>
 				</div>
 
 				<div
-					class="rounded-2xl bg-neutral p-4 pt-7 pb-6 font-mono text-neutral-content shadow-2xl border-white/5 relative overflow-hidden border text-[13px]"
+					class="rounded-2xl bg-neutral p-4 pt-8 pb-6 font-mono text-neutral-content shadow-2xl border-white/5 relative overflow-hidden border text-[13px]"
 				>
 					<span class="text-info">curl</span>
-					<span class="break-all opacity-90"> "{PUBLIC_API_URL}/api/push" \ </span>
+					<span class="break-all opacity-90"> "{PUBLIC_API_URL}/api/demo" \ </span>
 					<div>&nbsp;-d <span class="text-success">'{demoMessage}'</span></div>
 
 					<button
 						on:click={handleSubscribe}
 						disabled={push.isToggling}
-						class="btn right-2 bottom-2 gap-2 rounded-xl shadow-lg btn-sm btn-primary absolute border-none normal-case transition-all hover:scale-105 active:scale-95"
+						class="btn right-2 bottom-2 gap-2 rounded-xl shadow-lg btn-sm btn-primary disabled:bg-primary disabled:text-primary-content absolute border-none normal-case transition-all hover:scale-105 active:scale-95 disabled:opacity-80"
 					>
 						{#if push.isToggling}
 							<LoaderCircle size={14} class="animate-spin" />
@@ -178,7 +177,7 @@
 		</div>
 	</div>
 
-	<footer class="py-6 mt-auto text-center text-[12px] opacity-30">© 2024 Torchi Platform</footer>
+	<footer class="py-6 mt-auto text-center text-[12px] opacity-30">© 2025 Torchi Platform</footer>
 	{#if showInstallPopup}
 		<button
 			title="popup-outside"

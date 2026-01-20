@@ -191,7 +191,7 @@ export async function api<TResponse, TBody = unknown>(
 }
 
 // Result 타입 개선: 에러 타입을 ApiError로 구체화 가능하게 함
-type Result<T, E = ApiError> = { ok: true; data: T } | { ok: false; error: E };
+export type Result<T, E = ApiError> = { ok: true; data: T } | { ok: false; error: E };
 
 export async function catchError<T>(promise: Promise<T>): Promise<Result<T>> {
 	try {

@@ -146,7 +146,7 @@
 
 <div class="bg-base-100 font-sans text-base-content flex min-h-screen flex-col">
 	<header
-		class="top-0 border-base-content/10 bg-base-100/90 px-6 py-6 backdrop-blur-md sticky z-30 flex items-center justify-between border-b"
+		class="top-0 border-base-content/10 bg-base-100/90 px-5 py-5 backdrop-blur-md sticky z-30 flex items-center justify-between border-b"
 	>
 		<div>
 			<h1 class="text-xl font-black tracking-tight">Torchi</h1>
@@ -172,7 +172,7 @@
 	</header>
 
 	<main class="px-4 relative flex-1">
-		<div class="top-20 py-2 sticky z-20">
+		<div class="top-18 py-2 sticky z-20">
 			<div class="gap-2 flex items-center">
 				<!-- 서비스 필터 -->
 				<div class="relative inline-block">

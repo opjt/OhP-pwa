@@ -76,20 +76,15 @@
 		const idx = endpoints.findIndex((s) => s.id === id);
 		if (idx === -1) return;
 
-		let enable = endpoints[idx].active;
-		let token = endpoints[idx].token;
-		try {
-			if (enable) {
-				await muteEndpoint(token);
-			} else {
-				await unmuteEndpoint(token);
-			}
+		const { active, token } = endpoints[idx];
 
-			endpoints[idx].active = !endpoints[idx].active;
-		} catch (e) {
-			console.error(e);
-			// TODO: error 처리 toast
+		const result = active ? await muteEndpoint(token) : await unmuteEndpoint(token);
+
+		if (!result.ok) {
+			return;
 		}
+
+		endpoints[idx].active = !active;
 	}
 
 	async function copyEndpoint(token: string, id: string) {
@@ -337,7 +332,7 @@
 							/>
 							<button
 								onclick={() => copyEndpoint(endpoint.token, endpoint.id)}
-								class="btn top-1 right-1 btn-square rounded-lg btn-ghost btn-xs hover:bg-primary/10 hover:text-primary absolute"
+								class="btn top-1.5 right-1 btn-square rounded-lg btn-ghost btn-xs hover:bg-primary/10 hover:text-primary absolute"
 							>
 								{#if copiedId === endpoint.id}
 									<span class="font-bold text-success text-[9px]">V</span>
