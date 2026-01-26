@@ -36,7 +36,22 @@
 	}
 
 	function closePopup() {
+		hideInstallPopupForOneDay();
 		showInstallPopup = false;
+	}
+	const INSTALL_POPUP_HIDE_KEY = 'hideInstallPopupUntil';
+	const ONE_DAY = 1000 * 60 * 60 * 24;
+
+	function shouldShowInstallPopup() {
+		const hideUntil = localStorage.getItem(INSTALL_POPUP_HIDE_KEY);
+		if (!hideUntil) return true;
+
+		return Date.now() > Number(hideUntil);
+	}
+
+	function hideInstallPopupForOneDay() {
+		const tomorrow = Date.now() + ONE_DAY;
+		localStorage.setItem(INSTALL_POPUP_HIDE_KEY, String(tomorrow));
 	}
 
 	onMount(async () => {
@@ -54,7 +69,7 @@
 			);
 
 		// 3. iOS이고 아직 설치 안 했다면 -> 팝업 강제 표시 (iOS는 이벤트가 없으므로)
-		if (isIOS && !isStandalone) {
+		if (isIOS && !isStandalone && shouldShowInstallPopup()) {
 			// 약간의 딜레이를 주어 자연스럽게 등장
 			setTimeout(() => {
 				showInstallPopup = true;
@@ -68,7 +83,7 @@
 			deferredPrompt = e;
 
 			// 웹 환경 조건이 맞고, 설치 이벤트가 발생했을 때만 팝업 표시
-			if (isWebContext) {
+			if (isWebContext && shouldShowInstallPopup()) {
 				showInstallPopup = true;
 			}
 		});
@@ -205,7 +220,7 @@
 
 				<div class="px-8 gap-2 flex flex-1 flex-col items-center justify-center text-center">
 					<div
-						class="h-16 w-16 rounded-2xl bg-primary/20 text-primary shadow-xl flex items-center justify-center"
+						class="h-12 w-12 rounded-xl bg-primary/20 text-primary shadow-xl flex items-center justify-center"
 					>
 						<img src="/logo/icon-512x512.png" alt="logo" class="rounded-xl" />
 					</div>
