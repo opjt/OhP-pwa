@@ -26,11 +26,11 @@ export default defineConfig({
 			// Manifest 설정
 			manifest: {
 				name: 'torchi',
-				short_name: 'tch',
+				short_name: 'torchi',
 				description: 'On-demand hook push notification platform',
-				theme_color: '#0f172a',
 				background_color: '#ffffff',
-				display: 'standalone',
+				theme_color: 'transparent',
+				display: 'fullscreen',
 				scope: '/app',
 				start_url: '/app',
 				orientation: 'portrait',

@@ -220,7 +220,7 @@
 
 				<div class="px-8 gap-2 flex flex-1 flex-col items-center justify-center text-center">
 					<div
-						class="h-12 w-12 rounded-xl bg-primary/20 text-primary shadow-xl flex items-center justify-center"
+						class="h-12 w-12 rounded-xl text-primary bg-white drop-shadow-lg flex items-center justify-center"
 					>
 						<img src="/logo/icon-512x512.png" alt="logo" class="rounded-xl" />
 					</div>
